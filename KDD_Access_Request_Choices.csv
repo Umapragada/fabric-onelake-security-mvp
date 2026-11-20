@@ -1,0 +1,23 @@
+list_name,value,label,parent_value,sort_order,attributes
+request_type,New,New access,,1,
+request_type,Extend,Extend existing access,,2,
+request_type,Remove,Remove access,,3,
+domain,Procurement,Procurement,,1,
+domain,Payables,Payables,,2,
+role,PrcBuyer,Procurement buyer,Procurement,1,scope=ORG_ID;max_days=180;layers=Gold;requires_department=
+role,PrcPlanner,Demand planner,Procurement,2,scope=ORG_ID;max_days=180;layers=Gold;requires_department=
+role,PrcSteward,Procurement data steward,Procurement,3,scope=ALL;max_days=365;layers=Silver;requires_department=Data Governance
+role,PrcAuditor,Procurement auditor,Procurement,4,"scope=ALL;max_days=30;layers=Silver, Gold;requires_department=Internal Audit"
+role,ApClerk,AP clerk,Payables,5,scope=ORG_ID;max_days=180;layers=Gold;requires_department=
+role,ApTreasury,Treasury analyst,Payables,6,scope=ALL;max_days=90;layers=Gold;requires_department=Finance - Treasury
+role,ApSteward,Payables data steward,Payables,7,scope=ALL;max_days=365;layers=Silver;requires_department=Data Governance
+role,ApAuditor,Payables auditor,Payables,8,"scope=ALL;max_days=30;layers=Silver, Gold;requires_department=Internal Audit"
+scope,101,KDD Kuwait (101),ORG_ID,0,
+scope,102,KDD Saudi Arabia (102),ORG_ID,0,
+scope,103,KDD UAE (103),ORG_ID,0,
+scope,ALL,All operating units,ALL,0,
+reason_category,New joiner,New joiner,,1,
+reason_category,Role change,Role change,,2,
+reason_category,Project,Project,,3,
+reason_category,Audit,Audit,,4,
+reason_category,Cover for colleague,Cover for colleague,,5,

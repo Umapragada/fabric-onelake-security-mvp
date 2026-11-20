@@ -1,0 +1,171 @@
+{
+  "form_name": "KDD data access request (OneLake)",
+  "version": "1.0",
+  "target_table": "sec.AccessRequest",
+  "notes": "Portal-neutral spec. Build each field in ServiceNow, Jira Service Management, Freshservice or Power Apps; load choice lists from KDD_Access_Request_Choices.csv or read them live from sec.RoleTemplate and sec.ScopeValue.",
+  "fields": [
+    {
+      "id": "request_type",
+      "label": "Request type",
+      "type": "dropdown",
+      "required": true,
+      "choices": "request_type",
+      "maps_to": "RequestType"
+    },
+    {
+      "id": "requested_for",
+      "label": "Who needs access",
+      "type": "user_picker",
+      "required": true,
+      "source": "Entra ID directory (active users only)",
+      "maps_to": "UserId via sec.UserProfile.UPN",
+      "free_text": false
+    },
+    {
+      "id": "requested_by",
+      "label": "Requested by",
+      "type": "auto",
+      "value": "signed-in user",
+      "maps_to": "RequestedByUPN"
+    },
+    {
+      "id": "line_manager",
+      "label": "Line manager",
+      "type": "auto_readonly",
+      "value": "manager of requested_for from directory"
+    },
+    {
+      "id": "existing_grant",
+      "label": "Existing access to extend or remove",
+      "type": "dropdown",
+      "required_when": "request_type in ['Extend','Remove']",
+      "visible_when": "request_type in ['Extend','Remove']",
+      "source": "sec.vw_EffectiveAccess filtered to requested_for"
+    },
+    {
+      "id": "domain",
+      "label": "Data domain",
+      "type": "dropdown",
+      "required": true,
+      "choices": "domain",
+      "visible_when": "request_type == 'New'"
+    },
+    {
+      "id": "role",
+      "label": "Access role",
+      "type": "dependent_dropdown",
+      "required": true,
+      "choices": "role",
+      "depends_on": "domain",
+      "maps_to": "RoleTemplateId via RoleCode"
+    },
+    {
+      "id": "layer",
+      "label": "Data layer",
+      "type": "auto_readonly",
+      "value": "role.layers"
+    },
+    {
+      "id": "scope",
+      "label": "Operating unit",
+      "type": "dependent_dropdown",
+      "required": true,
+      "choices": "scope",
+      "depends_on": "role.scope",
+      "rule": "If role scope is ORG_ID show 101/102/103; if ALL, set 'ALL' and lock",
+      "maps_to": "ScopeValue"
+    },
+    {
+      "id": "start_date",
+      "label": "Start date",
+      "type": "date",
+      "required": true,
+      "min": "today",
+      "max": "today + 30 days",
+      "maps_to": "StartDate"
+    },
+    {
+      "id": "end_date",
+      "label": "End date",
+      "type": "date",
+      "required": true,
+      "min": "start_date + 1 day",
+      "max": "start_date + role.max_days",
+      "maps_to": "EndDate"
+    },
+    {
+      "id": "reason_category",
+      "label": "Reason",
+      "type": "dropdown",
+      "required": true,
+      "choices": "reason_category",
+      "maps_to": "ReasonCategory"
+    },
+    {
+      "id": "justification",
+      "label": "Business justification",
+      "type": "multiline_text",
+      "required": true,
+      "min_length": 30,
+      "max_length": 500,
+      "maps_to": "Justification"
+    },
+    {
+      "id": "approver",
+      "label": "Approver",
+      "type": "auto_readonly",
+      "value": "sec.Domain.OwnerUPN for the chosen domain",
+      "maps_to": "ApproverUPN (set on approval)"
+    },
+    {
+      "id": "acknowledge",
+      "label": "I confirm this access is needed for my job and I will follow the KDD data handling policy",
+      "type": "checkbox",
+      "required": true
+    },
+    {
+      "id": "ticket_ref",
+      "label": "Ticket number",
+      "type": "system",
+      "maps_to": "TicketRef"
+    }
+  ],
+  "validations": [
+    {
+      "id": "V1",
+      "rule": "requested_for must exist in sec.UserProfile with EmploymentStatus = Active",
+      "message": "This person is not an active employee in the access register."
+    },
+    {
+      "id": "V2",
+      "rule": "No overlapping Active, Approved or Pending request for the same user, role and scope",
+      "message": "This person already has or has requested this access. Use Extend instead."
+    },
+    {
+      "id": "V3",
+      "rule": "end_date - start_date <= role.max_days",
+      "message": "This role allows at most {max_days} days."
+    },
+    {
+      "id": "V4",
+      "rule": "If role.requires_department is set, requested_for department must match",
+      "message": "This role is limited to the {requires_department} department."
+    },
+    {
+      "id": "V5",
+      "rule": "No active grant that conflicts in sec.RoleConflict (Any, or SameScope with the same operating unit)",
+      "message": "Segregation of duties: {reason}."
+    },
+    {
+      "id": "V6",
+      "rule": "Requester cannot approve their own request",
+      "message": "Choose a different approver."
+    }
+  ],
+  "workflow": [
+    "Submitted → Pending",
+    "Domain owner approves or rejects",
+    "On approval: write row to sec.AccessRequest, call PL_SEC_Lifecycle on demand",
+    "Ticket closes when NotificationLog ENABLED = Sent"
+  ]
+}

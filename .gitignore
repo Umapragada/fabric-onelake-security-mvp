@@ -1,0 +1,7 @@
+# written by the scripts: tenant/app IDs, keep out of Git
+kdd_ids.env
+kdd_fabric_ids.json
+_backup_*/
+.DS_Store
+__pycache__/
+.venv/
