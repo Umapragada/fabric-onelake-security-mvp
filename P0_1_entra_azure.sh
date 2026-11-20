@@ -97,8 +97,16 @@ for ns in Microsoft.KeyVault Microsoft.Fabric; do
     exit 1; }
 done
 az group create --name "$RESOURCE_GROUP" --location "$LOCATION" -o none
+EXISTING_KV=$(az keyvault list --resource-group "$RESOURCE_GROUP" --query "[0].name" -o tsv 2>/dev/null)
+[ -n "$EXISTING_KV" ] && KEY_VAULT="$EXISTING_KV"
 if ! az keyvault show --name "$KEY_VAULT" >/dev/null 2>&1; then
-  az keyvault create --name "$KEY_VAULT" --resource-group "$RESOURCE_GROUP" --location "$LOCATION" --enable-rbac-authorization true -o none
+  # Free-trial subscriptions are often refused in busy regions: try a few until one accepts
+  for loc in "$LOCATION" northeurope swedencentral uaenorth francecentral eastus; do
+    az keyvault create --name "$KEY_VAULT" --resource-group "$RESOURCE_GROUP" --location "$loc" \
+      --enable-rbac-authorization true -o none 2>/dev/null && { echo "Key Vault $KEY_VAULT created in $loc"; break; }
+    echo "Region $loc refused the Key Vault, trying the next one"
+  done
+  az keyvault show --name "$KEY_VAULT" >/dev/null 2>&1 || { echo "STOP: no region accepted the Key Vault."; exit 1; }
 fi
 KV_ID=$(az keyvault show --name "$KEY_VAULT" --query id -o tsv)
 for role in "Key Vault Secrets Officer" "Key Vault Secrets User"; do
