@@ -40,8 +40,11 @@ while IFS='|' read -r upn name title dept; do
   [ -z "$upn" ] && continue
   if ! az ad user show --id "${upn}@${TENANT_DOMAIN}" >/dev/null 2>&1; then
     az ad user create --display-name "$name" --user-principal-name "${upn}@${TENANT_DOMAIN}" --password "$TEMP_PASSWORD" \
-      --force-change-password-next-sign-in true --job-title "$title" --department "$dept" >/dev/null && echo "Created ${upn}"
+      --force-change-password-next-sign-in true >/dev/null && echo "Created ${upn}"
   fi
+  # az ad user create has no job title/department flags: set them through Microsoft Graph
+  az rest --method PATCH --url "https://graph.microsoft.com/v1.0/users/${upn}@${TENANT_DOMAIN}" \
+    --headers "Content-Type=application/json" --body "{\"jobTitle\":\"$title\",\"department\":\"$dept\"}" >/dev/null
 done <<'USERS'
 emma.clarke|Emma Clarke|Demand Planner|Procurement
 lukas.weber|Lukas Weber|AP Clerk|Finance - Accounts Payable
@@ -56,6 +59,7 @@ omar.alrashidi|Omar Al-Rashidi|Head of Procurement|Procurement
 fatima.alenezi|Fatima Al-Enezi|Finance Controller|Finance
 yousef.alhajri|Yousef Al-Hajri|Head of Internal Audit|Internal Audit
 hamad.alfahad|Hamad Al-Fahad|Chief Digital Officer|IT
+datasteward|Data Steward|Buyer, Dairy Raw Materials|Procurement
 USERS
 az ad user show --id "datasteward@${TENANT_DOMAIN}" >/dev/null 2>&1 || echo "WARNING: datasteward@${TENANT_DOMAIN} not found; create it or edit the metamodel."
 
@@ -73,10 +77,25 @@ for perm in Group.Create GroupMember.ReadWrite.All User.Read.All Mail.Send; do
   az ad app permission add --id "$APP_ID" --api $GRAPH_SP --api-permissions "${RID}=Role" 2>/dev/null || true
 done
 sleep 20
-az ad app permission admin-consent --id "$APP_ID"
+# Grant admin consent as app role assignments through Graph (works in Cloud Shell, where
+# "az ad app permission admin-consent" fails with an unsupported MSI token audience).
+GRAPH_SP_OID=$(az ad sp show --id $GRAPH_SP --query id -o tsv)
+for perm in Group.Create GroupMember.ReadWrite.All User.Read.All Mail.Send; do
+  RID=$(az ad sp show --id $GRAPH_SP --query "appRoles[?value=='$perm'].id | [0]" -o tsv)
+  az rest --method POST --url "https://graph.microsoft.com/v1.0/servicePrincipals/$SP_OID/appRoleAssignments" \
+    --headers "Content-Type=application/json" \
+    --body "{\"principalId\":\"$SP_OID\",\"resourceId\":\"$GRAPH_SP_OID\",\"appRoleId\":\"$RID\"}" >/dev/null 2>&1 \
+    && echo "Granted $perm" || echo "$perm already granted (or check API permissions in the portal)"
+done
 az ad group member check --group "$SG_AUTOMATION" --member-id "$SP_OID" --query value -o tsv | grep -q true || az ad group member add --group "$SG_AUTOMATION" --member-id "$SP_OID"
 
 echo "== Resource group and Key Vault"
+for ns in Microsoft.KeyVault Microsoft.Fabric; do
+  az provider register --namespace $ns -o none 2>/dev/null || {
+    echo "STOP: you are not Owner of subscription $(az account show --query id -o tsv)."
+    echo "Portal > Subscriptions > Access control (IAM) > Add role assignment > Owner > yourself, then reopen Cloud Shell and re-run."
+    exit 1; }
+done
 az group create --name "$RESOURCE_GROUP" --location "$LOCATION" -o none
 if ! az keyvault show --name "$KEY_VAULT" >/dev/null 2>&1; then
   az keyvault create --name "$KEY_VAULT" --resource-group "$RESOURCE_GROUP" --location "$LOCATION" --enable-rbac-authorization true -o none
