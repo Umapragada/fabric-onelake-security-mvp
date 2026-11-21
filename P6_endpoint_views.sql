@@ -1,13 +1,14 @@
 /* Phase 6 · report views for the SQL ANALYTICS ENDPOINT of SQLDB_SecMeta
    The endpoint mirrors tables but not views. Run this there (drop-down: SQL analytics endpoint),
    then use New semantic model on these views. Re-runnable. */
+   Computed columns (RequestNumber) are not mirrored, so they are rebuilt here.
 
 CREATE OR ALTER VIEW sec.vw_EffectiveAccess AS
 SELECT u.DisplayName, u.UPN, u.Department, d.DomainName, rt.RoleCode, rt.DisplayName AS RoleName,
        r.ScopeValue, sv.Label AS ScopeLabel,
        rt.RoleCode + CASE WHEN r.ScopeValue = 'ALL' THEN 'All' ELSE 'OU' + r.ScopeValue END AS OneLakeRole,
        r.StartDate, r.EndDate, DATEDIFF(DAY, CAST(GETDATE() AS DATE), r.EndDate) AS DaysLeft,
-       r.RequestNumber, r.TicketRef, r.ApproverUPN
+       ('ACC-' + RIGHT('00000' + CAST(r.RequestId AS VARCHAR(10)), 5)) AS RequestNumber, r.TicketRef, r.ApproverUPN
 FROM sec.AccessRequest r
 JOIN sec.UserProfile  u  ON u.UserId = r.UserId
 JOIN sec.RoleTemplate rt ON rt.RoleTemplateId = r.RoleTemplateId
@@ -28,7 +29,7 @@ SELECT a.AuditId, a.EventTime, CAST(a.EventTime AS DATE) AS EventDate, a.Action,
        CASE WHEN a.Action LIKE 'REQUEST_%' THEN 'Request' WHEN a.Action LIKE 'GROUP_%' THEN 'Entra group'
             WHEN a.Action LIKE 'ROLE_%' OR a.Action IN ('DRY_RUN','DRIFT_DETECTED') THEN 'OneLake role'
             WHEN a.Action LIKE 'WORKSPACE_%' THEN 'Workspace role' ELSE 'Other' END AS ActionGroup,
-       a.Target, a.Actor, a.Outcome, a.RunId, r.RequestNumber, r.TicketRef, u.DisplayName AS PersonName, rt.RoleCode, d.DomainName,
+       a.Target, a.Actor, a.Outcome, a.RunId, ('ACC-' + RIGHT('00000' + CAST(r.RequestId AS VARCHAR(10)), 5)) AS RequestNumber, r.TicketRef, u.DisplayName AS PersonName, rt.RoleCode, d.DomainName,
        a.BeforeJson, a.AfterJson
 FROM sec.AuditLog a
 LEFT JOIN sec.AccessRequest r ON r.RequestId = a.RequestId
@@ -56,7 +57,7 @@ GROUP BY d.DomainName, rt.RoleCode, rt.DisplayName, r.ScopeValue, sv.Label, r.St
 GO
 
 CREATE OR ALTER VIEW sec.vw_NotificationStatus AS
-SELECT n.NotificationId, n.NotificationType, n.SentTo, n.Cc, n.ScheduledFor, n.Status, n.Error, r.RequestNumber, u.DisplayName AS PersonName
+SELECT n.NotificationId, n.NotificationType, n.SentTo, n.Cc, n.ScheduledFor, n.Status, n.Error, ('ACC-' + RIGHT('00000' + CAST(r.RequestId AS VARCHAR(10)), 5)) AS RequestNumber, u.DisplayName AS PersonName
 FROM sec.NotificationLog n JOIN sec.AccessRequest r ON r.RequestId = n.RequestId JOIN sec.UserProfile u ON u.UserId = r.UserId;
 GO
 
