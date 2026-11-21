@@ -1,7 +1,7 @@
 /* Phase 6 · report views for the SQL ANALYTICS ENDPOINT of SQLDB_SecMeta
    The endpoint mirrors tables but not views. Run this there (drop-down: SQL analytics endpoint),
-   then use New semantic model on these views. Re-runnable. */
-   Computed columns (RequestNumber) are not mirrored, so they are rebuilt here.
+   then use New semantic model on these views. Re-runnable.
+   Computed columns (RequestNumber) are not mirrored, so they are rebuilt here. */
 
 CREATE OR ALTER VIEW sec.vw_EffectiveAccess AS
 SELECT u.DisplayName, u.UPN, u.Department, d.DomainName, rt.RoleCode, rt.DisplayName AS RoleName,
