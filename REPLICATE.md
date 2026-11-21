@@ -70,8 +70,8 @@ Nothing in Azure/Fabric is lost; only the local folder. Paste (all steps reuse w
 ```bash
 gh auth status || gh auth login
 gh repo clone Umapragada/fabric-onelake-security-mvp; cd ~/fabric-onelake-security-mvp && git pull
-az login --use-device-code --tenant $TENANT_DOMAIN
 export TENANT_DOMAIN=... ADMIN_UPN=... CAPACITY_NAME="..."           # same values as section A
+az login --use-device-code --tenant $TENANT_DOMAIN
 export KDD_MAIL_SENDER=$ADMIN_UPN KDD_SECURITY_MAIL=$ADMIN_UPN
 bash P0_1_entra_azure.sh && python P0_2_fabric_deploy.py foundation   # regenerates kdd_ids.env and kdd_fabric_ids.json
 ```
