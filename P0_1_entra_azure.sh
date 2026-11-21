@@ -7,18 +7,20 @@
 # =====================================================================================
 set -euo pipefail
 
-# ---------- EDIT THESE ----------
-TENANT_DOMAIN="hiteshtaneja307gmail380.onmicrosoft.com"
-ADMIN_UPN="umapragada@${TENANT_DOMAIN}"           # Uma: security admin, Fabric admin, capacity admin
-LOCATION="westeurope"                              # Azure region for Key Vault and capacity
-RESOURCE_GROUP="rg-kdd-fabric-lab"
-KEY_VAULT="kv-kdd-fabric-$RANDOM"                  # must be globally unique; reused if kdd_ids.env exists
-CAPACITY_NAME="kddfabriclab"                       # lowercase letters/digits only
-CREATE_CAPACITY="no"                               # "yes" to create an F2 capacity here (billed hourly; pause it when idle)
-TEMP_PASSWORD="Kdd!Lab-$(date +%Y)-Change"         # first-sign-in password for test users
+_ENV_CAP="${CAPACITY_NAME:-}"
+# ---------- EDIT THESE (or export them before running; exported values win) ----------
+TENANT_DOMAIN="${TENANT_DOMAIN:-hiteshtaneja307gmail380.onmicrosoft.com}"
+ADMIN_UPN="${ADMIN_UPN:-umapragada@${TENANT_DOMAIN}}"   # security admin, Fabric admin, capacity admin
+LOCATION="${LOCATION:-westeurope}"                      # first region tried for Key Vault (others tried if refused)
+RESOURCE_GROUP="${RESOURCE_GROUP:-rg-kdd-fabric-lab}"
+KEY_VAULT="${KEY_VAULT:-kv-kdd-fabric-$RANDOM}"         # globally unique; an existing vault in RESOURCE_GROUP is reused
+CAPACITY_NAME="${CAPACITY_NAME:-kddfabriclab}"          # Fabric capacity display name (trial: Trial-2026...)
+CREATE_CAPACITY="${CREATE_CAPACITY:-no}"                # "yes" creates an F2 capacity (billed hourly; pause when idle)
+TEMP_PASSWORD="${TEMP_PASSWORD:-Kdd!Lab-$(date +%Y)-Change}"   # first-sign-in password for test users
 # --------------------------------
 
 [ -f kdd_ids.env ] && source kdd_ids.env && echo "Reusing values from kdd_ids.env"
+[ -n "$_ENV_CAP" ] && CAPACITY_NAME="$_ENV_CAP"   # an exported CAPACITY_NAME beats the saved one
 az account show >/dev/null 2>&1 || az login --tenant "$TENANT_DOMAIN"
 TENANT_ID=$(az account show --query tenantId -o tsv)
 ADMIN_OID=$(az ad user show --id "$ADMIN_UPN" --query id -o tsv)
@@ -147,3 +149,9 @@ echo "Done. Values saved to kdd_ids.env."
 echo "MANUAL STEP NOW: Fabric admin portal > Tenant settings > Developer settings >"
 echo "  'Service principals can call Fabric public APIs' = Enabled, limited to security group sg-fabric-automation."
 echo "RECOMMENDED: limit Mail.Send to the sender mailbox with Exchange Online RBAC for Applications."
+
+# Keep the metamodel's tenant in step with this tenant (P3 builds UPNs from @Tenant)
+if [ -f P3_metamodel.sql ]; then
+  sed -i "s/^DECLARE @Tenant NVARCHAR(100) = N'[^']*';/DECLARE @Tenant NVARCHAR(100) = N'${TENANT_DOMAIN}';/" P3_metamodel.sql
+  echo "P3_metamodel.sql @Tenant set to ${TENANT_DOMAIN}"
+fi
