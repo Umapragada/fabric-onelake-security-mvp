@@ -12,6 +12,9 @@ Everything below was hit on the first run in the lab tenant. Follow it top to bo
 4. Real mail: the sender mailbox needs an Exchange Online licence. Without one, notifications stay `Queued`.
 
 ## A. Cloud Shell (Bash)
+First time Cloud Shell opens: choose **Mount storage account** (not "No storage account"), so files survive
+the ~20-minute idle reset. It costs a few cents a month. Type commands; don't up-arrow into `foundation` by accident.
+
 ```bash
 gh auth status || gh auth login                       # repo is private
 gh repo clone Umapragada/fabric-onelake-security-mvp && cd fabric-onelake-security-mvp
@@ -48,6 +51,32 @@ Both Gold notebooks end with "Reconciled".
    (roles list shows DefaultReader). SQL analytics endpoint → Settings → Data access mode = **User's identity** (usually already set).
 2. NB_SEC_Sync: `DRY_RUN = True` → Run all → no `FAILED:` lines. Then `DRY_RUN = False` → Run all.
 
+## F. Lifecycle and test request (Phase 5)
+```bash
+python P0_2_fabric_deploy.py pipeline    # PL_SEC_Lifecycle + daily 06:00 Kuwait schedule
+python P0_2_fabric_deploy.py run
+```
+Test request (replaces the Power Apps form for the MVP), in SQLDB_SecMeta:
+```sql
+INSERT INTO sec.AccessRequest (RequestType,UserId,RoleTemplateId,ScopeValue,StartDate,EndDate,ReasonCategory,Justification,RequestedByUPN,ApproverUPN,ApprovedAt,Status)
+SELECT 'New', 3, 1, '101', CAST(GETDATE() AS date), DATEADD(day,30,CAST(GETDATE() AS date)), 'Project', N'MVP test: buyer access OU 101',
+       u.UPN, d.OwnerUPN, SYSUTCDATETIME(), 'Approved'
+FROM sec.UserProfile u CROSS JOIN (SELECT TOP 1 OwnerUPN FROM sec.Domain) d WHERE u.UserId = 3;
+```
+Then `python P0_2_fabric_deploy.py run` → Emma Clarke appears in `grp-ol-PrcBuyerOU101`.
+
+## Restore after a Cloud Shell reset
+Nothing in Azure/Fabric is lost; only the local folder. Paste (all steps reuse what exists):
+```bash
+gh auth status || gh auth login
+gh repo clone Umapragada/fabric-onelake-security-mvp; cd ~/fabric-onelake-security-mvp && git pull
+az login --use-device-code --tenant $TENANT_DOMAIN
+export TENANT_DOMAIN=... ADMIN_UPN=... CAPACITY_NAME="..."           # same values as section A
+export KDD_MAIL_SENDER=$ADMIN_UPN KDD_SECURITY_MAIL=$ADMIN_UPN
+bash P0_1_entra_azure.sh && python P0_2_fabric_deploy.py foundation   # regenerates kdd_ids.env and kdd_fabric_ids.json
+```
+Don't re-run `P3_metamodel.sql` after the first time: it resets the register.
+
 ## Known gotchas
 | Symptom | Fix |
 |---|---|
@@ -59,4 +88,7 @@ Both Gold notebooks end with "Reconciled".
 | `PRIMARY KEY keyword is not supported` | You are in the SQL analytics endpoint; open the SQL database |
 | JDBC certificate name error | Fixed in NB_SEC_Common (retries; validation stays on) |
 | `ROLE_APPLY_FAILED` | OneLake security not enabled on that lakehouse (step E.1) |
-| Cloud Shell lost files | Sessions are ephemeral: re-clone and re-run A (all steps reuse what exists) |
+| Cloud Shell lost files | See "Restore after a Cloud Shell reset"; mount storage to avoid it |
+| `DRIFT_DETECTED` right after a successful apply | Fixed in NB_SEC_Sync (compares governed fields only) |
+| Graph 404 on a group just created | Fixed in NB_SEC_Sync (waits for Entra replication) |
+| `PolicyValidationError ... "Read"` | Fixed (columnAction is a list) |
