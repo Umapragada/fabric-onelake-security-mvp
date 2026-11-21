@@ -141,7 +141,7 @@ html{scroll-behavior:smooth}
 </header>
 
 <nav class="idx" aria-label="Sections">
-  <a href="#usecase">Use case</a><a href="#form">Request form</a><a href="#arch">Architecture</a><a href="#bronze">Bronze data</a><a href="#model">Security metamodel</a><a href="#erd">ER and data flow</a><a href="#compile">Rows to role</a><a href="#sync">Sync engine</a><a href="#life">Access lifecycle</a><a href="#matrix">Where it holds</a><a href="#personas">Test personas</a><a href="#flow">End-to-end flow</a><a href="#status">Status</a><a href="#plan">Build plan</a>
+  <a href="#usecase">Use case</a><a href="#form">Request form</a><a href="#arch">Architecture</a><a href="#bronze">Bronze data</a><a href="#model">Security metamodel</a><a href="#erd">ER and data flow</a><a href="#compile">Rows to role</a><a href="#sync">Sync engine</a><a href="#life">Access lifecycle</a><a href="#matrix">Where it holds</a><a href="#personas">Test personas</a><a href="#flow">End-to-end flow</a><a href="#status">Status</a><a href="#e2e">Test walkthrough</a><a href="#reuse">Reuse</a><a href="#ai">AI agents</a><a href="#plan">Build plan</a>
 </nav>
 
 <!-- ============ USE CASE ============ -->
@@ -1044,10 +1044,216 @@ svg .st-b{fill:var(--bad-soft)} svg .st-b-t{fill:var(--bad);font-size:10px;font-
       <tr><td><b>P5</b> Lifecycle and mail</td><td><span class="pill p-warn">Core done</span></td><td>Daily pipeline succeeds; approved request became Active and the user joined the group.</td><td>Mail delivery needs a licensed mailbox (stays Queued). Watch the first expiry and revoke on a real run. Request form and approval flow (Power Apps / ServiceNow + Power Automate) instead of SQL inserts. Limit Mail.Send to one mailbox.</td></tr>
       <tr><td><b>P6</b> Audit and report</td><td><span class="pill p-ok">Done</span></td><td>RPT_SEC_Admin with 5 pages on SM_SEC_Admin.</td><td>Share with Internal Audit as an item share. Purview audit search for role changes. Schedule <code>usp_PurgeEvidence</code> once retention is agreed.</td></tr>
       <tr><td><b>P7</b> Test matrix</td><td><span class="pill p-bad">Not started</span></td><td>—</td><td>Sign in as each persona and check section 8 surfaces: SQL endpoint, Spark, Power BI Direct Lake, then Copilot and data agent on paid capacity. Log results in a test sheet.</td></tr>
+      <tr><td colspan="4"><b>Extended scope (added 21 Nov)</b></td></tr>
+      <tr><td><b>P8</b> Domain onboarding kit</td><td><span class="pill p-bad">Not started</span></td><td>Sync is already register-driven (section 14).</td><td>Move workspace and lakehouse lists in <code>P0_2</code> to a domain config file; support scope types beyond operating unit; a "new domain" SQL template.</td></tr>
+      <tr><td><b>P9</b> Cross-domain products</td><td><span class="pill p-bad">Not started</span></td><td>Shortcut pattern proved with <code>silver.supplier</code>.</td><td>First product workspace (e.g. P2P), rules for derived tables, second approver for cross-domain roles.</td></tr>
+      <tr><td><b>P10</b> AI agents and semantic layer</td><td><span class="pill p-bad">Not started</span></td><td>Agents and models already listed in the register.</td><td>Sync grants agent and model access from source roles; daily check for import models, fixed identities and delegated endpoints; tests C1 to C7 on paid capacity.</td></tr>
       <tr><td><b>KDD</b> Replication</td><td><span class="pill p-warn">Ready</span></td><td>All fixes are in the repo; REPLICATE.md is the step-by-step checklist.</td><td>Run it in the KDD tenant with KDD values for tenant, admin, capacity and mailbox.</td></tr>
     </tbody>
   </table></div>
   <div class="note">Fixes found during the lab run and now in the code: Cloud Shell sign-in and consent, Key Vault region fallback, SQL certificate validation through the gateway, the column-permission format in OneLake roles, Entra replication delay, false drift after apply, and report views for the SQL analytics endpoint.</div>
+</section>
+
+<style>
+.steps{counter-reset:st;display:grid;gap:10px;margin:14px 0}
+.steps>li{list-style:none;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:12px 14px 12px 52px;position:relative}
+.steps>li::before{counter-increment:st;content:counter(st);position:absolute;left:14px;top:12px;width:26px;height:26px;border-radius:50%;background:var(--sec);color:var(--panel);font:600 13px/26px var(--f-mono);text-align:center}
+.steps pre{margin:8px 0 0}
+svg .ar.ok{stroke:var(--ok)} svg .ar.bad{stroke:var(--bad);stroke-dasharray:5 4}
+svg .bx.badz{fill:var(--bad-soft);stroke:var(--bad)}
+svg .lbl{font-size:10.5px;font-weight:600}
+</style>
+
+<section id="e2e">
+  <span class="eyebrow">13 · End-to-end test walkthrough (P7)</span>
+  <h2>Test it as the people who will use it</h2>
+  <p class="lede">You learn the product by signing in as each persona and seeing what they get. Use a private browser window per user (Chrome Incognito or Safari Private), sign in at app.fabric.microsoft.com, and keep your own admin window open beside it. Test users first sign in with the temporary password set by <code>P0_1</code> (<code>TEMP_PASSWORD</code>) and must change it.</p>
+
+  <h3>Part A · What each person sees (read tests)</h3>
+  <p>For each test, open the lakehouse → switch the drop-down to <b>SQL analytics endpoint</b> → New SQL query. Write down pass or fail in the test sheet.</p>
+  <div class="tablewrap"><table>
+    <thead><tr><th>#</th><th>Sign in as</th><th>Open</th><th>Run or do</th><th>Expected</th></tr></thead>
+    <tbody>
+      <tr><td>A1</td><td>datasteward</td><td>WS-PRC-Gold → LH_PRC_Gold</td><td><code>SELECT org_id, COUNT(*) FROM gold.fact_purchase_order GROUP BY org_id</code></td><td>One row only: <b>102</b> (Saudi Arabia).</td></tr>
+      <tr><td>A2</td><td>datasteward</td><td>same</td><td><code>SELECT * FROM gold.dim_supplier</code>, then <code>SELECT supplier_id, supplier_name FROM gold.dim_supplier</code></td><td>The first query fails (it asks for hidden VAT and bank columns). The second works.</td></tr>
+      <tr><td>A3</td><td>datasteward</td><td>Workspaces list</td><td>Look for WS-AP-Gold</td><td>Not visible, because buyers get nothing in Payables.</td></tr>
+      <tr><td>A4</td><td>emma.clarke</td><td>LH_PRC_Gold</td><td>Same as A1, then <code>SELECT TOP 5 * FROM gold.fact_purchase_order</code></td><td>Only <b>101</b>. She holds Planner and Buyer for OU 101 (ACC-00017), so note which columns appear. Roles add up. If the query errors on mixed row and column rules, record it: that is a real finding to raise.</td></tr>
+      <tr><td>A5</td><td>lukas.weber</td><td>WS-AP-Gold → LH_AP_Gold</td><td><code>SELECT org_id, COUNT(*) FROM gold.fact_invoice GROUP BY org_id</code>; <code>SELECT * FROM gold.dim_supplier</code></td><td>Only <b>103</b> (UAE). The <code>SELECT *</code> fails because bank columns are hidden. WS-PRC-* not visible.</td></tr>
+      <tr><td>A6</td><td>priya.nair</td><td>LH_AP_Gold</td><td><code>SELECT org_id, COUNT(*) FROM gold.fact_payment GROUP BY org_id</code></td><td>All three OUs, and <code>gold.dim_bank_account</code> is visible. No Procurement workspaces.</td></tr>
+      <tr><td>A7</td><td>maryam.alajmi</td><td>WS-PRC-Silver and WS-AP-Silver</td><td>Query any Silver table</td><td>All rows and all OUs. On AP Silver the bank account table is not listed.</td></tr>
+      <tr><td>A8</td><td>reem.alkandari</td><td>Workspaces list</td><td>Look for any WS-PRC-* workspace</td><td>Nothing, because her request is still Pending (B2 changes this).</td></tr>
+      <tr><td>A9</td><td>umapragada (you)</td><td>LH_PRC_Gold</td><td>Same as A1</td><td>All OUs. Workspace Admin bypasses OneLake roles by design. This is why admins and engineers are a short, named list.</td></tr>
+    </tbody>
+  </table></div>
+
+  <h3>Part B · The lifecycle (change tests)</h3>
+  <p>Run the SQL in <b>SQLDB_SecMeta</b> (SQL database, not the endpoint). After each change, run the pipeline: <code>python P0_2_fabric_deploy.py run</code> in Cloud Shell, or WS-SEC-Control → PL_SEC_Lifecycle → Run. Then check RPT_SEC_Admin.</p>
+  <ol class="steps">
+    <li><b>Expiry (happens by itself).</b> Sam Patel's audit grants end on 21 Nov. After the 22 Nov 06:00 run, Sam's requests 6 and 7 show <code>Expired</code>, Sam leaves the auditor groups, and AuditLog has <code>REQUEST_EXPIRED</code> and group-removal rows. Sign in as sam.patel: the PRC and AP workspaces are gone.</li>
+    <li><b>Approve a pending request.</b> Reem (ACC-00012, Planner OU 102):
+      <pre>UPDATE sec.AccessRequest SET Status='Approved', ApproverUPN=(SELECT OwnerUPN FROM sec.Domain WHERE DomainId=1), ApprovedAt=SYSUTCDATETIME() WHERE RequestId=12;</pre>
+      Run the pipeline. Expected: a new group <code>grp-ol-PrcPlannerOU102</code>, a new role on LH_PRC_Gold, and A8 now shows OU 102 quantities without prices.</li>
+    <li><b>Segregation of duties.</b> Ask for AP clerk OU 101 for Emma, who is already a buyer on OU 101:
+      <pre>INSERT INTO sec.AccessRequest (RequestType,UserId,RoleTemplateId,ScopeValue,StartDate,EndDate,ReasonCategory,Justification,RequestedByUPN,ApproverUPN,ApprovedAt,Status)
+SELECT 'New',3,5,'101',CAST(GETDATE() AS date),DATEADD(day,30,CAST(GETDATE() AS date)),'Project',N'SoD test',u.UPN,u.UPN,SYSUTCDATETIME(),'Approved'
+FROM sec.UserProfile u WHERE u.UserId=3;</pre>
+      Expected after the run: <code>Rejected</code> with reason <i>RoleConflict</i>, and Emma gets no AP access.</li>
+    <li><b>Too long.</b> Same insert with RoleTemplateId 4 (auditor, MaxDays 30) and 90 days. Expected: <code>Rejected</code>, MaxDays.</li>
+    <li><b>Leaver.</b> <pre>UPDATE sec.UserProfile SET EmploymentStatus='Leaver', LeaverDate=CAST(GETDATE() AS date) WHERE UserId=11;</pre> Expected: all of Ahmed Hassan's grants <code>Revoked</code> (Leaver), and he leaves grp-ol-ApClerkOU103. Set him back to Active afterwards if you need him again.</li>
+    <li><b>Hand edit is caught (drift).</b> As admin, open LH_PRC_Gold → Manage OneLake data access → PrcBuyerOU101 → add a table → Save. Run NB_SEC_Sync. Expected: <code>DRIFT_DETECTED</code> with the first difference, and the role is left as you edited it. Then set <code>FORCE_ITEMS = "LH_PRC_Gold"</code> and run again: the register version is restored.</li>
+    <li><b>Evidence.</b> Open RPT_SEC_Admin: every step above shows in Audit trail, Sync health and Notifications (Queued until a mailbox exists).</li>
+  </ol>
+
+  <h3>Part C · Other engines and AI (needs paid F2 or higher, so do this in KDD)</h3>
+  <div class="tablewrap"><table>
+    <thead><tr><th>#</th><th>Surface</th><th>Test as datasteward</th><th>Expected</th></tr></thead>
+    <tbody>
+      <tr><td>C1</td><td>Power BI on <b>Direct Lake on OneLake</b> model over LH_PRC_Gold</td><td>Report with PO value by country</td><td>Saudi Arabia only</td></tr>
+      <tr><td>C2</td><td>Copilot in that report</td><td>"Total PO value by country"</td><td>Saudi Arabia only</td></tr>
+      <tr><td>C3</td><td>Fabric data agent DA_Procurement</td><td>Same question</td><td>Saudi Arabia only; asking about invoices gets no data</td></tr>
+      <tr><td>C4</td><td>Data agent published to Microsoft 365 Copilot</td><td>Same question in Copilot chat</td><td>Same answer as C3</td></tr>
+      <tr><td>C5</td><td>Foundry agent with the Fabric data agent tool (identity passthrough)</td><td>Same question</td><td>Same answer as C3</td></tr>
+      <tr><td>C6</td><td>Spark, in a workspace where the user is Contributor, reading LH_PRC_Gold by shortcut</td><td><code>spark.sql("SELECT org_id, count(*) …")</code></td><td>102 only; hidden columns missing</td></tr>
+    </tbody>
+  </table></div>
+  <div class="note">Pass rule: a test passes only when the answer is the same on every surface. A surface that shows more than the SQL endpoint is a leak, so stop and fix it before go-live.</div>
+</section>
+
+<section id="reuse">
+  <span class="eyebrow">14 · Reuse for other domains and cross-domain products</span>
+  <h2>Add a domain by adding rows, not code</h2>
+  <p class="lede">The sync reads its targets from the register (<code>sec.Workspace</code> and <code>sec.Item</code> with <code>OneLakeSecured = 1</code>). Any lakehouse listed there gets the full role set compiled from the rules, every day. The engine does not know the words "Procurement" or "Payables".</p>
+
+  <h3>Onboard a new domain, for example Sales</h3>
+  <div class="tablewrap"><table>
+    <thead><tr><th>Step</th><th>Where</th><th>What</th><th>Code change?</th></tr></thead>
+    <tbody>
+      <tr><td>1</td><td>Fabric</td><td>Create WS-SAL-Bronze/Silver/Gold and LH_SAL_*. Add spn-fabric-secops as Member. Today <code>P0_2</code> has the workspace list hard-coded.</td><td><span class="pill p-warn">Small</span> move lists to a domain config file (P8)</td></tr>
+      <tr><td>2</td><td>Lakehouse UI</td><td>Enable OneLake security on Silver and Gold. Set the SQL endpoint to User's identity.</td><td>No</td></tr>
+      <tr><td>3</td><td>SQLDB_SecMeta</td><td><code>sec.Domain</code> (owner = approver), <code>sec.Workspace</code>, <code>sec.Item</code> (OneLakeSecured = 1)</td><td>No</td></tr>
+      <tr><td>4</td><td>SQLDB_SecMeta</td><td><code>sec.RoleTemplate</code> (e.g. SalRep, ORG_ID, 180 days), then <code>ObjectRule</code>, <code>RowRule</code>, <code>ColumnRule</code> and any <code>RoleConflict</code></td><td>No</td></tr>
+      <tr><td>5</td><td>Gold data</td><td>Every fact table that needs row security carries the scope column (<code>org_id</code>).</td><td>Domain notebooks only</td></tr>
+      <tr><td>6</td><td>Pipeline</td><td>Nothing. The next 06:00 run creates the groups and roles; a dry run shows them first.</td><td>No</td></tr>
+    </tbody>
+  </table></div>
+  <div class="note">A new kind of scope (brand, region, cost centre instead of operating unit) needs two changes: widen the <code>ScopeType</code> check in <code>RoleTemplate</code> and <code>ScopeValue</code>, and let the role compiler read the filter value from that scope. That is the main code change to plan for in P8.</div>
+
+  <h3>Cross-domain data products</h3>
+  <div class="scroll">
+  <svg viewBox="0 0 1000 265" role="img" aria-label="Cross-domain data product built on shortcuts">
+    <defs><marker id="arr2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="context-stroke"/></marker></defs>
+    <style>svg .ar2{fill:none;stroke-width:1.5;marker-end:url(#arr2)}</style>
+    <text x="20" y="22" class="m">DOMAIN SOURCES (rules live here)</text>
+    <text x="400" y="22" class="m">DATA PRODUCT WORKSPACE · WS-P2P-Gold</text>
+    <text x="780" y="22" class="m">CONSUMERS</text>
+    <rect class="bx ol" x="20" y="40" width="300" height="90" rx="8"/>
+    <text x="34" y="64" class="h">LH_PRC_Gold</text><text x="34" y="84" class="s">roles: PrcBuyer · PrcPlanner · PrcAuditor</text><text x="34" y="102" class="m">row filter org_id, column lists</text>
+    <rect class="bx id" x="20" y="160" width="300" height="90" rx="8"/>
+    <text x="34" y="184" class="h">LH_AP_Gold</text><text x="34" y="204" class="s">roles: ApClerk · ApTreasury · ApAuditor</text><text x="34" y="222" class="m">row filter org_id, bank columns hidden</text>
+    <rect class="bx" x="400" y="40" width="320" height="210" rx="8"/>
+    <text x="414" y="64" class="h">LH_P2P_Gold</text>
+    <rect class="bx" x="414" y="76" width="292" height="62" rx="6" style="stroke:var(--ok)"/>
+    <text x="424" y="96" class="lbl" fill="var(--ok)">Shortcuts: fact_purchase_order, fact_invoice</text>
+    <text x="424" y="114" class="s">user identity goes to the source; source</text><text x="424" y="129" class="s">roles apply. Nothing to add.</text>
+    <rect class="bx" x="414" y="148" width="292" height="90" rx="6" style="stroke:var(--warn)"/>
+    <text x="424" y="168" class="lbl" fill="var(--warn)">Derived table: p2p_three_way_match</text>
+    <text x="424" y="186" class="s">a new physical copy, so source roles do</text><text x="424" y="201" class="s">not follow it. Register it as an Item with</text><text x="424" y="216" class="s">its own RowRule on org_id and P2P roles.</text>
+    <rect class="bx ppl" x="780" y="40" width="200" height="90" rx="8"/>
+    <text x="794" y="64" class="h">P2P analyst</text><text x="794" y="84" class="s">P2P role from the register,</text><text x="794" y="100" class="s">plus source roles for shortcuts</text>
+    <rect class="bx ppl" x="780" y="160" width="200" height="90" rx="8"/>
+    <text x="794" y="184" class="h">Agents and reports</text><text x="794" y="204" class="s">see section 15</text>
+    <path class="ar2" stroke="var(--ok)" d="M410 107 H330"/>
+    <path class="ar2" stroke="var(--ok)" d="M410 120 C360 120 360 205 330 205"/>
+    <path class="ar2" stroke="var(--ink)" d="M776 85 H724"/>
+    <path class="ar2" stroke="var(--ink)" d="M776 205 H724"/>
+  </svg></div>
+  <ul>
+    <li><b>Secure at the source, share by shortcut.</b> A product made only of OneLake shortcuts needs no new rules. The design already does this for <code>silver.supplier</code>, which Procurement reads from Payables.</li>
+    <li><b>Anything materialised is a new asset.</b> Joined or aggregated tables get their own <code>sec.Item</code> and rules. The product owner is the Domain owner, so they approve its requests.</li>
+    <li><b>Two approvers.</b> If a product role exposes both domains' data, both owners should approve. Today a request carries one approver, so P9 adds a second approval step.</li>
+  </ul>
+</section>
+
+<section id="ai">
+  <span class="eyebrow">15 · AI agents, semantic models and ontologies</span>
+  <h2>One rule: the question must reach OneLake as the person who asked</h2>
+  <p class="lede">Agents, semantic models and ontologies can sit in any workspace (an AI workspace, the domain Gold workspace, or Foundry in Azure). That is fine. What matters is the identity that finally reads OneLake. If it is the asking user, the register's roles apply automatically. If it is a fixed account, or the data was copied out, they do not.</p>
+  <div class="scroll">
+  <svg viewBox="0 0 1100 470" role="img" aria-label="AI access paths and where OneLake security applies">
+    <defs><marker id="arr3" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="context-stroke"/></marker></defs>
+    <style>svg .ar3{fill:none;stroke-width:1.5;marker-end:url(#arr3)}</style>
+    <text x="20" y="22" class="m">WHERE PEOPLE ASK</text>
+    <text x="250" y="22" class="m">AGENT LAYER (any workspace)</text>
+    <text x="560" y="22" class="m">SEMANTIC LAYER (domain Gold workspace)</text>
+    <text x="860" y="22" class="m">DOMAIN DATA · rules from register</text>
+
+    <rect class="bx ppl" x="20" y="40" width="190" height="50" rx="8"/><text x="34" y="70" class="h">Microsoft 365 Copilot</text>
+    <rect class="bx ppl" x="20" y="105" width="190" height="50" rx="8"/><text x="34" y="135" class="h">Foundry agent / app</text>
+    <rect class="bx ppl" x="20" y="170" width="190" height="50" rx="8"/><text x="34" y="200" class="h">Power BI Copilot</text>
+    <rect class="bx ppl" x="20" y="235" width="190" height="50" rx="8"/><text x="34" y="265" class="h">Data agent chat</text>
+
+    <rect class="bx" x="250" y="60" width="260" height="130" rx="8"/>
+    <text x="264" y="84" class="h">Fabric data agent</text>
+    <text x="264" y="102" class="m">DA_Procurement · WS-AI-Agents</text>
+    <text x="264" y="124" class="s">sources: lakehouse, semantic model,</text><text x="264" y="140" class="s">ontology, from other workspaces</text>
+    <text x="264" y="162" class="s">runs as the asking user</text>
+    <rect class="st-ok" x="452" y="168" width="52" height="14" rx="7"/><text class="st-ok-t" x="459" y="178">as user</text>
+
+    <rect class="bx" x="250" y="210" width="260" height="76" rx="8"/>
+    <text x="264" y="234" class="h">Foundry IQ knowledge base</text>
+    <text x="264" y="254" class="s">indexes content into Azure AI Search</text>
+    <text x="264" y="272" class="s">(a copy, owned by the search service)</text>
+
+    <rect class="bx ol" x="560" y="60" width="250" height="90" rx="8"/>
+    <text x="574" y="84" class="h">SM_Procurement</text>
+    <text x="574" y="104" class="s">Direct Lake on OneLake,</text><text x="574" y="120" class="s">no fixed-identity connection</text>
+    <rect class="st-ok" x="752" y="128" width="52" height="14" rx="7"/><text class="st-ok-t" x="759" y="138">as user</text>
+
+    <rect class="bx" x="560" y="165" width="250" height="90" rx="8"/>
+    <text x="574" y="189" class="h">Ontology (Fabric IQ)</text>
+    <text x="574" y="209" class="s">entities bound to Gold tables</text><text x="574" y="225" class="s">preview: prove it in test C7</text>
+    <rect class="st-w" x="722" y="233" width="82" height="14" rx="7"/><text class="st-w-t" x="729" y="243">to verify</text>
+
+    <rect class="bx ol" x="860" y="60" width="220" height="200" rx="8"/>
+    <text x="874" y="84" class="h">LH_PRC_Gold · LH_AP_Gold</text>
+    <text x="874" y="106" class="s">OneLake security roles</text>
+    <text x="874" y="124" class="s">rows by org_id</text><text x="874" y="142" class="s">allowed columns only</text>
+    <text x="874" y="168" class="s">SQL endpoint in</text><text x="874" y="184" class="s">User's identity mode</text>
+    <text x="874" y="212" class="m">same answer on</text><text x="874" y="228" class="m">every surface</text>
+
+    <!-- red lane -->
+    <rect class="bx badz" x="250" y="320" width="830" height="130" rx="8"/>
+    <text x="264" y="344" class="h" fill="var(--bad)">Paths where OneLake roles do not follow, and the fix</text>
+    <text x="264" y="368" class="s">• Import-mode semantic model (data copied into the model) → use Direct Lake on OneLake, or generate model RLS from RowRule.</text>
+    <text x="264" y="388" class="s">• Direct Lake on SQL or DirectQuery with a fixed identity, or SQL endpoint in delegated mode → switch to the user's identity.</text>
+    <text x="264" y="408" class="s">• Foundry IQ index built over governed tables → don't index governed data; let Foundry call the Fabric data agent instead.</text>
+    <text x="264" y="428" class="s">• Workspace Admin, Member or Contributor on a domain data workspace → bypasses roles; keep it to engineers and the service principal.</text>
+
+    <path class="ar3" stroke="var(--ok)" d="M210 65 H246"/>
+    <path class="ar3" stroke="var(--ok)" d="M210 130 C230 130 230 120 246 120"/>
+    <path class="ar3" stroke="var(--ok)" d="M210 260 C230 260 230 175 246 175"/>
+    <path class="ar3" stroke="var(--ok)" d="M210 195 C380 195 520 145 556 140"/>
+    <path class="ar3" stroke="var(--bad)" stroke-dasharray="5 4" d="M150 155 V248 H246"/>
+    <path class="ar3" stroke="var(--ok)" d="M510 90 H556"/>
+    <path class="ar3" stroke="var(--ok)" d="M510 150 C535 150 535 200 556 200"/>
+    <path class="ar3" stroke="var(--ok)" d="M810 100 H856"/>
+    <path class="ar3" stroke="var(--warn)" d="M810 210 H856"/>
+    <path class="ar3" stroke="var(--ok)" d="M510 75 C700 40 800 40 856 75"/>
+  </svg></div>
+
+  <h3>How it maps to your layout</h3>
+  <div class="tablewrap"><table>
+    <thead><tr><th>Item</th><th>Where it lives</th><th>What the user needs</th><th>Who grants it</th></tr></thead>
+    <tbody>
+      <tr><td>Fabric data agent</td><td>An AI workspace (e.g. WS-AI-Agents) or the domain Gold workspace</td><td>Access to the agent (item share or Viewer on that workspace), plus read on each source</td><td>Agent access: register (P10). Source access: the sync, already today</td></tr>
+      <tr><td>Semantic model</td><td>Domain Gold workspace (SM_Procurement)</td><td>Build or Read on the model, plus the OneLake role underneath</td><td>Model access: register (P10). Rows and columns: OneLake roles, already today</td></tr>
+      <tr><td>Ontology</td><td>Domain workspace</td><td>Read on the ontology, plus the OneLake role on bound tables</td><td>Same pattern once test C7 shows how queries run</td></tr>
+      <tr><td>Foundry agent</td><td>Azure subscription (Foundry project)</td><td>Same tenant, a Foundry role, and the Fabric data agent tool with identity passthrough</td><td>Azure RBAC (outside Fabric); data stays governed by the agent's sources</td></tr>
+      <tr><td>Foundry IQ knowledge base</td><td>Azure AI Search</td><td>Search permissions; OneLake roles are not applied to the index</td><td>Use it only for documents that are open to the audience, not for governed tables</td></tr>
+    </tbody>
+  </table></div>
+  <div class="note">The register already lists <code>SM_Procurement</code>, <code>DA_Procurement</code>, <code>SM_Payables</code> and <code>DA_Payables</code> as items (not OneLake-secured). P10 makes the sync give agent and model access to exactly the groups that hold the source roles, and adds a daily check that flags import models, fixed-identity connections and delegated SQL endpoints. Ontology and Foundry IQ behaviour is in preview and changes quickly, so the C7 test decides the final rule.</div>
+  <p><b>Extra test C7 (KDD, paid capacity):</b> build an ontology on LH_PRC_Gold and add it as a data agent source. Ask as datasteward. Pass if only OU 102 appears. If other OUs appear, keep ontologies restricted to people who may see all their bound data until it is fixed.</p>
 </section>
 
 <footer>
