@@ -1,0 +1,1115 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>FMCG OneLake Security Blueprint</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans+Condensed:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<style>
+/* Layout: a single engineering blueprint, read top to bottom; sticky section index; diagrams in scroll boxes */
+:root{
+  --bg:#f5f6f4; --panel:#ffffff; --ink:#18232b; --muted:#5b6870; --line:#d5dbd9;
+  --prc:#1f6f78; --prc-soft:#e0eff0;     /* Procurement domain */
+  --ap:#6a4c93;  --ap-soft:#ece6f4;      /* Payables domain */
+  --sec:#b0560f; --sec-soft:#fbeadc;     /* Security control plane */
+  --ok:#2f7a3d; --warn:#9a6a00; --bad:#a23434;
+  --ok-soft:#e3f1e5; --warn-soft:#fbf1d6; --bad-soft:#f7e1e1;
+  --code:#eef1ef;
+  --bronze:#9a5b2c; --bronze-soft:#f4e6d9; --silver:#6b7882; --silver-soft:#eaeef1; --gold:#a17c0c; --gold-soft:#f8efcd;
+  --f-display:"IBM Plex Sans Condensed","Arial Narrow",system-ui,sans-serif;
+  --f-body:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --f-mono:"IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#12181c; --panel:#1a2227; --ink:#e4eaec; --muted:#9aa7ad; --line:#2f3a40;
+  --prc:#5fb8c1; --prc-soft:#1b3236; --ap:#b39ddb; --ap-soft:#2a2438;
+  --sec:#f0a061; --sec-soft:#3a2a1c; --ok:#7cc98a; --warn:#e2b94f; --bad:#f08a8a;
+  --ok-soft:#1d3322; --warn-soft:#3a3019; --bad-soft:#3d2224; --code:#0f1417;
+  --bronze:#d69c6c; --bronze-soft:#33261b; --silver:#b6c2ca; --silver-soft:#252d33; --gold:#e2c25c; --gold-soft:#342d17; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#12181c; --panel:#1a2227; --ink:#e4eaec; --muted:#9aa7ad; --line:#2f3a40;
+  --prc:#5fb8c1; --prc-soft:#1b3236; --ap:#b39ddb; --ap-soft:#2a2438;
+  --sec:#f0a061; --sec-soft:#3a2a1c; --ok:#7cc98a; --warn:#e2b94f; --bad:#f08a8a;
+  --ok-soft:#1d3322; --warn-soft:#3a3019; --bad-soft:#3d2224; --code:#0f1417;
+  --bronze:#d69c6c; --bronze-soft:#33261b; --silver:#b6c2ca; --silver-soft:#252d33; --gold:#e2c25c; --gold-soft:#342d17; color-scheme:dark}
+
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:15px;line-height:1.55}
+.wrap{max-width:1180px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:28px 64px}
+h1,h2,h3{font-family:var(--f-display);text-wrap:balance;line-height:1.15;margin:0}
+h1{font-size:clamp(28px,4.4vw,42px);font-weight:700;letter-spacing:-.01em}
+h2{font-size:26px;font-weight:600}
+h3{font-size:17px;font-weight:600}
+p{margin:0;max-width:72ch}
+code,.mono{font-family:var(--f-mono);font-size:.86em}
+.eyebrow{font-family:var(--f-mono);font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+header.top{display:grid;gap:12px;padding-bottom:20px;border-bottom:1px solid var(--line)}
+.meta{display:flex;flex-wrap:wrap;gap:8px 18px;color:var(--muted);font-size:13px}
+nav.idx{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--bg);border-bottom:1px solid var(--line);margin-inline:-4px;padding:10px 4px;display:flex;gap:6px;overflow-x:auto}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--bg)}
+nav.idx a{flex:none;font-size:13px;color:var(--ink);text-decoration:none;padding:5px 10px;border:1px solid var(--line);border-radius:999px;background:var(--panel)}
+nav.idx a:hover,nav.idx a:focus-visible{border-color:var(--sec);outline:none}
+section{display:grid;gap:16px;padding-top:40px}
+.lede{color:var(--muted)}
+.scroll{overflow-x:auto;background:var(--panel);border:1px solid var(--line);border-radius:10px}
+.scroll svg{display:block;min-width:980px;width:100%;height:auto}
+svg text{font-family:var(--f-body);fill:var(--ink)}
+svg .t-muted{fill:var(--muted)} svg .t-mono{font-family:var(--f-mono)}
+svg .t-prc{fill:var(--prc)} svg .t-ap{fill:var(--ap)} svg .t-sec{fill:var(--sec)}
+.legend{display:flex;flex-wrap:wrap;gap:8px 18px;font-size:13px;color:var(--muted)}
+.sw{display:inline-block;width:12px;height:12px;border-radius:3px;vertical-align:-1px;margin-right:6px}
+.grid{display:grid;gap:14px}
+.g2{grid-template-columns:repeat(auto-fit,minmax(320px,1fr))}
+.g3{grid-template-columns:repeat(auto-fit,minmax(260px,1fr))}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:16px;display:grid;gap:10px;align-content:start;min-width:0}
+.cluster{display:grid;gap:10px;min-width:0}
+.cluster>.eyebrow{padding-left:2px}
+.tbl{background:var(--panel);border:1px solid var(--line);border-radius:8px;overflow:hidden;min-width:0}
+.tbl h4{margin:0;font-family:var(--f-mono);font-size:13px;font-weight:500;padding:8px 12px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;gap:8px}
+.tbl ul{list-style:none;margin:0;padding:8px 12px;font-family:var(--f-mono);font-size:12.5px;display:grid;gap:2px}
+.tbl li{display:flex;gap:8px;overflow-wrap:anywhere}
+.tbl li b{font-weight:500;color:var(--muted);min-width:22px;font-size:11px}
+.tbl.who h4{background:var(--sec-soft)} .tbl.what h4{background:var(--prc-soft)} .tbl.how h4{background:var(--ap-soft)}
+.tbl.gen h4{background:var(--code)} .tbl.evi h4{background:var(--warn-soft)}
+.tag{font-size:11px;color:var(--muted);font-family:var(--f-body)}
+pre{margin:0;background:var(--code);border:1px solid var(--line);border-radius:8px;padding:12px 14px;overflow-x:auto;font-family:var(--f-mono);font-size:12.5px;line-height:1.5;white-space:pre}
+.k{color:var(--sec)} .s{color:var(--prc)} .c{color:var(--muted)}
+ol.steps{list-style:none;margin:0;padding:0;display:grid;gap:10px;counter-reset:st}
+ol.steps li{counter-increment:st;display:grid;grid-template-columns:34px 1fr;gap:12px;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:12px 14px;min-width:0}
+ol.steps li::before{content:counter(st);font-family:var(--f-mono);font-size:13px;width:28px;height:28px;border-radius:50%;display:grid;place-items:center;background:var(--sec-soft);color:var(--sec);font-weight:500}
+ol.steps li div{min-width:0;display:grid;gap:4px}
+ol.steps .api{font-family:var(--f-mono);font-size:12px;color:var(--muted);overflow-wrap:anywhere}
+.lifecycle{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}
+.state{background:var(--panel);border:1px solid var(--line);border-top:4px solid var(--line);border-radius:8px;padding:12px;display:grid;gap:6px;align-content:start}
+.state.req{border-top-color:var(--muted)} .state.act{border-top-color:var(--ok)} .state.exp{border-top-color:var(--warn)} .state.rev{border-top-color:var(--bad)} .state.ext{border-top-color:var(--prc)}
+.state .mail{font-size:12.5px;background:var(--code);border-radius:6px;padding:6px 8px}
+.state .mail b{font-weight:600}
+.tablewrap{overflow-x:auto;background:var(--panel);border:1px solid var(--line);border-radius:10px}
+table{border-collapse:collapse;width:100%;min-width:860px;font-size:13.5px}
+th,td{text-align:left;vertical-align:top;padding:10px 12px;border-bottom:1px solid var(--line)}
+th{font-family:var(--f-mono);font-size:11.5px;font-weight:500;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);background:var(--code)}
+tr:last-child td{border-bottom:none}
+td.num{font-variant-numeric:tabular-nums;font-family:var(--f-mono)}
+.pill{display:inline-block;font-size:11.5px;font-weight:600;padding:2px 8px;border-radius:999px;white-space:nowrap}
+.p-ok{background:var(--ok-soft);color:var(--ok)} .p-warn{background:var(--warn-soft);color:var(--warn)} .p-bad{background:var(--bad-soft);color:var(--bad)}
+.p-prc{background:var(--prc-soft);color:var(--prc)} .p-ap{background:var(--ap-soft);color:var(--ap)} .p-sec{background:var(--sec-soft);color:var(--sec)}
+.note{border-left:3px solid var(--sec);background:var(--sec-soft);padding:10px 14px;border-radius:0 8px 8px 0;font-size:14px}
+.phase{display:grid;grid-template-columns:auto 1fr;gap:4px 14px;align-items:baseline}
+.phase .ph{font-family:var(--f-mono);font-size:12px;color:var(--sec);font-weight:500}
+ul.plain{margin:0;padding-left:18px;display:grid;gap:4px}
+a{color:var(--prc)}
+.fgrid{display:grid;grid-template-columns:minmax(120px,170px) minmax(0,1fr);gap:10px 12px;align-items:center}
+.fgrid label{font-size:13px;color:var(--muted)}
+.fgrid select,.fgrid input,.fgrid textarea{width:100%;font:inherit;font-size:14px;padding:7px 9px;border:1px solid var(--line);border-radius:6px;background:var(--panel);color:var(--ink)}
+.fgrid input[readonly]{background:var(--code);color:var(--muted)}
+.fgrid select:disabled{opacity:.6}
+.fgrid :focus-visible,.actions button:focus-visible,.ack input:focus-visible{outline:2px solid var(--sec);outline-offset:1px}
+.hint{font-size:12px;color:var(--muted)}
+.ack{display:flex;gap:8px;align-items:flex-start;font-size:13.5px}
+.actions{display:flex;gap:10px}
+.actions button{font:inherit;font-weight:600;padding:8px 16px;border-radius:6px;border:1px solid var(--sec);background:var(--sec);color:var(--panel);cursor:pointer}
+.actions button.ghost{background:transparent;color:var(--ink);border-color:var(--line)}
+.err{color:var(--bad);background:var(--bad-soft);border-radius:6px;padding:8px 10px;font-size:13.5px}
+.okmsg{color:var(--ok);background:var(--ok-soft);border-radius:6px;padding:8px 10px;font-size:13.5px}
+#f_result{display:grid;gap:8px}
+@media (max-width:520px){.fgrid{grid-template-columns:1fr}}
+
+svg .ln{stroke:var(--muted);fill:none;stroke-width:1.4}
+svg .fl{stroke:var(--sec);fill:none;stroke-width:1.8;stroke-dasharray:6 4}
+svg .inc{stroke:var(--ink);fill:none;stroke-width:1.2;stroke-dasharray:5 4}
+svg .ov{fill:var(--panel);stroke:var(--ink);stroke-width:1.2}
+svg .ov.auto{fill:var(--code)}
+svg .ov.sys{fill:var(--sec-soft);stroke:var(--sec)}
+svg .act{stroke:var(--ink);fill:none;stroke-width:1.6}
+svg .act circle{fill:var(--panel)}
+svg .ent{fill:var(--panel);stroke:var(--line)}
+svg .ext{fill:var(--panel);stroke:var(--muted);stroke-dasharray:5 4}
+svg .hd-who{fill:var(--sec-soft)} svg .hd-what{fill:var(--prc-soft)} svg .hd-how{fill:var(--ap-soft)} svg .hd-gen{fill:var(--code)} svg .hd-evi{fill:var(--warn-soft)}
+svg .badge{fill:var(--sec)} svg .badge-t{fill:var(--panel);font-family:var(--f-mono);font-size:11px;font-weight:500}
+svg .card-t{font-size:12.5px;font-weight:600}
+svg .fld{font-family:var(--f-mono);font-size:10.5px;fill:var(--muted)}
+svg .card-m{font-size:11px;fill:var(--muted)}
+footer{padding-top:40px;color:var(--muted);font-size:13px;display:grid;gap:6px}
+@media (prefers-reduced-motion:reduce){*{scroll-behavior:auto!important}}
+html{scroll-behavior:smooth}
+</style>
+
+<div class="wrap">
+<header class="top">
+  <span class="eyebrow">MVP · 18 Nov 2026 · Umapragada</span>
+  <h1>FMCG OneLake Security Blueprint</h1>
+  <p class="lede">Case company: KDD (The Kuwaiti Danish Dairy Company). Two domains (Procurement, Payables), Oracle EBS shaped bronze data, and a hidden security control plane that turns metadata rows into Entra groups, workspace roles and OneLake roles with RLS and CLS. Access is time-boxed, audited and mailed.</p>
+  <div class="meta"><span>Source: Oracle EBS R12 (simulated CSV)</span><span>Operating units: 101 Kuwait (KWD) · 102 Saudi Arabia (SAR) · 103 UAE (AED)</span><span>RLS key: <code>ORG_ID</code></span></div>
+</header>
+
+<nav class="idx" aria-label="Sections">
+  <a href="#usecase">Use case</a><a href="#form">Request form</a><a href="#arch">Architecture</a><a href="#bronze">Bronze data</a><a href="#model">Security metamodel</a><a href="#erd">ER and data flow</a><a href="#compile">Rows to role</a><a href="#sync">Sync engine</a><a href="#life">Access lifecycle</a><a href="#matrix">Where it holds</a><a href="#personas">Test personas</a><a href="#flow">End-to-end flow</a><a href="#status">Status</a><a href="#plan">Build plan</a>
+</nav>
+
+<!-- ============ USE CASE ============ -->
+<section id="usecase">
+  <span class="eyebrow">1 · Use case</span>
+  <h2>KDD: one security definition for procurement and payables data</h2>
+  <div class="note">Illustrative learning scenario. KDD's public profile (products, markets) is real; its ERP setup, operating units, people and figures here are assumptions for the lab and do not describe KDD's actual systems.</div>
+
+  <div class="grid g2">
+    <div class="card"><h3>Business context</h3>
+      <p>KDD, founded in 1962, is the market leader in dairy in Kuwait. It makes dairy products, ice cream, natural juices and fruit drinks, and culinary products, and exports across the Middle East, including Saudi Arabia, Iraq, Bahrain, UAE, Qatar, Oman, Lebanon, Jordan, and India.</p>
+      <p>In this lab KDD runs Oracle EBS R12 with three operating units: <b>101 Kuwait</b> (KWD, three-decimal fils amounts), <b>102 Saudi Arabia</b> (SAR) and <b>103 UAE</b> (AED). It is moving procurement and payables reporting to Microsoft Fabric.</p></div>
+    <div class="card"><h3>What each domain buys and pays for</h3>
+      <ul class="plain">
+        <li><span class="pill p-prc">Procurement</span> milk powder and raw milk, fruit concentrates, cocoa and sugar, aseptic cartons and PET bottles, cold-chain logistics. Item categories: Dairy, Ice cream, Juices, Culinary, Raw materials, Packaging.</li>
+        <li><span class="pill p-ap">Payables</span> invoices from local and European suppliers, payment schedules, payments in three currencies, and supplier bank accounts (IBAN).</li></ul></div>
+  </div>
+
+  <div class="grid g3">
+    <div class="card"><h3>The problem</h3><ul class="plain">
+      <li>Analysts get whole-workspace access, so a Kuwait buyer can see Saudi purchase prices and an AP clerk can see supplier IBANs.</li>
+      <li>Grants are added by hand, rarely removed, and nobody can show who approved them.</li>
+      <li>Copilot, data agents and Foundry agents are arriving; each could expose data in its own way.</li></ul></div>
+    <div class="card"><h3>Goal</h3><p>Define security once, as metadata, and have it applied automatically to every engine that reads OneLake. Every grant is approved, time-limited, mailed, audited and revoked on time.</p></div>
+    <div class="card"><h3>Value</h3><ul class="plain">
+      <li>One place to change security: a row, not clicks in four tools.</li>
+      <li>Least privilege by row and column.</li>
+      <li>Evidence for internal audit.</li>
+      <li>AI tools inherit the same rules.</li></ul></div>
+  </div>
+
+  <h3>Actors</h3>
+  <div class="tablewrap"><table>
+    <thead><tr><th>Actor</th><th>Responsibility</th></tr></thead>
+    <tbody>
+      <tr><td>Business user (buyer, planner, AP clerk, treasury, auditor)</td><td>Requests and consumes data</td></tr>
+      <tr><td>Line manager / data owner</td><td>Approves requests; copied on mails</td></tr>
+      <tr><td>Security admin (Uma)</td><td>Maintains the metamodel; runs the control plane</td></tr>
+      <tr><td>Service principal spn-fabric-secops</td><td>Applies changes through Graph and Fabric APIs; no person signs in as it</td></tr>
+      <tr><td>Fabric admin</td><td>Creates domains and tenant settings</td></tr>
+      <tr><td>Internal auditor</td><td>Reviews audit trail and admin report</td></tr>
+    </tbody></table></div>
+
+  <div class="grid g2">
+    <div class="card"><h3>Business rules</h3><ol class="plain">
+      <li><b>Buyers</b>: POs, receipts and supplier names for their own operating unit only. No VAT number, no Payables.</li>
+      <li><b>Planners</b>: quantities and dates for their operating unit. No unit_price or po_value.</li>
+      <li><b>AP clerks</b>: invoices and payment status for their operating unit. No bank accounts, no Procurement.</li>
+      <li><b>Treasury</b>: payments and bank accounts for all operating units. No Procurement.</li>
+      <li><b>Auditors</b>: both domains, all operating units, minus bank account, IBAN and VAT columns. Always short-term.</li>
+      <li><b>Bronze</b> (raw EBS) is restricted to data engineers and auditors.</li>
+      <li>Every grant has an end date, capped by the role's MaxDays.</li>
+      <li>Leavers are revoked on the next daily run.</li>
+      <li>No manual role edits; drift is detected and reported.</li></ol></div>
+    <div class="card"><h3>Acceptance criteria</h3><ul class="plain">
+      <li>All six personas get exactly the access in section 9, on all eleven surfaces in section 8.</li>
+      <li>No business user can see WS-SEC-Control, the metamodel, the pipeline or the admin report.</li>
+      <li>Every grant, revoke and role change has an AuditLog row with before and after JSON.</li>
+      <li>Every state change has a NotificationLog row with status Sent.</li>
+      <li>A revoke takes effect on the next run with no manual step.</li>
+      <li>DefaultReader does not exist on any secured lakehouse.</li></ul>
+      <h3>Out of scope</h3><ul class="plain">
+      <li>Live Oracle EBS connection (data is simulated).</li>
+      <li>Filtering workspace Admins, Members, Contributors (by design).</li>
+      <li>Copilot and data agent tests on trial capacity (needs F2+).</li></ul></div>
+  </div>
+
+  <h3>Scenarios</h3>
+  <div class="tablewrap"><table>
+    <thead><tr><th>ID</th><th>Scenario</th><th>What happens</th></tr></thead>
+    <tbody>
+      <tr><td class="mono">UC-1</td><td>Grant access</td><td>Data Steward's manager requests PrcBuyer for OU 102 Saudi Arabia, 18 Nov to 15 Feb. Approver approves. Sync adds Data Steward to grp-ol-PrcBuyerOU102, ensures role PrcBuyerOU102 on LH_PRC_Gold and Viewer on WS-PRC-Gold. "Access enabled" mail goes to Data Steward and their manager; audit row written.</td></tr>
+      <tr><td class="mono">UC-2</td><td>Consume securely</td><td>Data Steward asks "total PO value by country" in the SQL endpoint, a notebook, Power BI, Copilot, the data agent, M365 Copilot and a Foundry agent. Every answer shows Saudi Arabia only. <code>SELECT *</code> on dim_supplier fails because of the hidden VAT column.</td></tr>
+      <tr><td class="mono">UC-3</td><td>Expiry warning</td><td>At T-7 and T-1 the user and approver get a mail explaining how to extend.</td></tr>
+      <tr><td class="mono">UC-4</td><td>Extension</td><td>Approver moves EndDate; audit logs old and new date; confirmation mail sent.</td></tr>
+      <tr><td class="mono">UC-5</td><td>Automatic revoke</td><td>sam.audit's end date (21 Nov) passes. Next run removes him from groups, sends "Revoked" mail, writes audit. His queries now fail.</td></tr>
+      <tr><td class="mono">UC-6</td><td>Leaver or manual revoke</td><td>User marked Leaver in UserProfile; all grants revoked on the next run.</td></tr>
+      <tr><td class="mono">UC-7</td><td>New scope</td><td>KDD adds OU 104 Qatar. Admin inserts one ScopeValue row; sync creates the new roles and groups. No code change.</td></tr>
+      <tr><td class="mono">UC-8</td><td>Admin reporting</td><td>RPT_SEC_Admin shows who has what until when, expiring this week, failed mails, sync errors and role history. Purview audit backs it up.</td></tr>
+      <tr><td class="mono">UC-9</td><td>Drift detection</td><td>Someone edits a role in the UI. The ETag check fails, the run is flagged, and the item is not overwritten until an admin reviews it.</td></tr>
+    </tbody></table></div>
+
+  <h3>Use case diagram</h3>
+  <div class="scroll">
+  <svg viewBox="0 0 1100 690" role="img" aria-label="UML use case diagram: manager, approver, business user and auditor on the left; scheduler, security admin Uma and the service principal on the right; nine use cases inside the control plane boundary, five of which include Sync roles and groups, which includes Send mail.">
+    <defs>
+      <marker id="uca" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M0,0 L10,5 L0,10" style="fill:none;stroke:var(--ink)" stroke-width="1.4"/></marker>
+    </defs>
+    <rect x="225" y="30" width="650" height="640" rx="6" style="fill:none;stroke:var(--ink)" stroke-width="1.2"/>
+    <text x="243" y="56" font-weight="600" font-size="13">KDD OneLake security control plane</text>
+
+    <path class="ln" d="M113 130 L270 110"/><path class="ln" d="M113 130 L270 210"/>
+    <path class="ln" d="M113 260 L270 110"/><path class="ln" d="M113 260 L270 210"/>
+    <path class="ln" d="M113 368 L272 336"/>
+    <path class="ln" d="M113 560 L270 560"/>
+    <path class="ln" d="M987 150 L845 110"/><path class="ln" d="M987 150 L845 190"/>
+    <path class="ln" d="M987 350 L845 270"/><path class="ln" d="M987 350 L845 350"/><path class="ln" d="M987 350 L845 430"/>
+    <path class="ln" d="M1020 348 H1060 V650 H395 V587"/>
+    <path class="ln" d="M987 510 L845 510"/>
+
+    <path class="inc" d="M520 110 H555 M520 210 H555 M585 190 H555 M585 270 H555 M585 350 H555 M555 110 V510"/>
+    <path class="inc" d="M555 510 H588" marker-end="url(#uca)"/>
+    <text x="561" y="470" font-size="10.5" class="t-muted">«include»</text>
+    <path class="inc" d="M715 537 V561" marker-end="url(#uca)"/>
+    <text x="724" y="554" font-size="10.5" class="t-muted">«include»</text>
+
+    <g text-anchor="middle">
+      <ellipse class="ov" cx="395" cy="110" rx="125" ry="27"/><text x="395" y="106" class="t-mono t-muted" font-size="10.5">UC-1</text><text x="395" y="122" font-size="12.5">Grant access</text>
+      <ellipse class="ov" cx="395" cy="210" rx="125" ry="27"/><text x="395" y="206" class="t-mono t-muted" font-size="10.5">UC-4</text><text x="395" y="222" font-size="12.5">Extend access</text>
+      <ellipse class="ov" cx="395" cy="330" rx="125" ry="27"/><text x="395" y="326" class="t-mono t-muted" font-size="10.5">UC-2</text><text x="395" y="342" font-size="12.5">Query secured data</text>
+      <ellipse class="ov" cx="395" cy="560" rx="125" ry="27"/><text x="395" y="556" class="t-mono t-muted" font-size="10.5">UC-8</text><text x="395" y="572" font-size="12.5">View admin report</text>
+      <ellipse class="ov auto" cx="715" cy="110" rx="130" ry="27"/><text x="715" y="106" class="t-mono t-muted" font-size="10.5">UC-3</text><text x="715" y="122" font-size="12.5">Send expiry warning</text>
+      <ellipse class="ov auto" cx="715" cy="190" rx="130" ry="27"/><text x="715" y="186" class="t-mono t-muted" font-size="10.5">UC-5</text><text x="715" y="202" font-size="12.5">Revoke on end date</text>
+      <ellipse class="ov" cx="715" cy="270" rx="130" ry="27"/><text x="715" y="266" class="t-mono t-muted" font-size="10.5">UC-7</text><text x="715" y="282" font-size="12.5">Add new scope (OU)</text>
+      <ellipse class="ov" cx="715" cy="350" rx="130" ry="27"/><text x="715" y="346" class="t-mono t-muted" font-size="10.5">UC-6</text><text x="715" y="362" font-size="12.5">Revoke leaver / manual</text>
+      <ellipse class="ov" cx="715" cy="430" rx="130" ry="27"/><text x="715" y="426" class="t-mono t-muted" font-size="10.5">UC-9</text><text x="715" y="442" font-size="12.5">Review role drift</text>
+      <ellipse class="ov sys" cx="715" cy="510" rx="130" ry="27"/><text x="715" y="515" font-size="12.5" font-weight="600">Sync roles and groups</text>
+      <ellipse class="ov sys" cx="715" cy="590" rx="130" ry="27"/><text x="715" y="595" font-size="12.5" font-weight="600">Send mail</text>
+    </g>
+
+    <g class="act">
+      <circle cx="95" cy="110" r="10"/><path d="M95 120 V145 M80 128 H110 M95 145 L84 162 M95 145 L106 162"/>
+      <circle cx="95" cy="240" r="10"/><path d="M95 250 V275 M80 258 H110 M95 275 L84 292 M95 275 L106 292"/>
+      <circle cx="95" cy="350" r="10"/><path d="M95 360 V385 M80 368 H110 M95 385 L84 402 M95 385 L106 402"/>
+      <circle cx="95" cy="540" r="10"/><path d="M95 550 V575 M80 558 H110 M95 575 L84 592 M95 575 L106 592"/>
+      <circle cx="1005" cy="130" r="10"/><path d="M1005 140 V165 M990 148 H1020 M1005 165 L994 182 M1005 165 L1016 182"/>
+      <circle cx="1005" cy="330" r="10"/><path d="M1005 340 V365 M990 348 H1020 M1005 365 L994 382 M1005 365 L1016 382"/>
+      <circle cx="1005" cy="490" r="10"/><path d="M1005 500 V525 M990 508 H1020 M1005 525 L994 542 M1005 525 L1016 542"/>
+    </g>
+    <g text-anchor="middle" font-size="12">
+      <text x="95" y="180">Line manager</text>
+      <text x="95" y="310">Approver</text>
+      <text x="95" y="420">Business user</text><text x="95" y="435" class="t-muted" font-size="10.5">(Data Steward, buyer KSA)</text>
+      <text x="95" y="610">Internal auditor</text>
+      <text x="1005" y="200">Scheduler</text><text x="1005" y="215" class="t-muted" font-size="10.5">daily 06:00</text>
+      <text x="1005" y="400">Security admin</text><text x="1005" y="415" class="t-muted" font-size="10.5">(Uma)</text>
+      <text x="1005" y="560">Service principal</text><text x="1005" y="575" class="t-muted" font-size="10.5">«system»</text>
+    </g>
+  </svg>
+  </div>
+  <div class="legend">
+    <span>White ovals: started by a person</span>
+    <span>Grey ovals: started by the schedule</span>
+    <span>Orange ovals: shared steps every change goes through</span>
+    <span>Dashed «include»: always runs as part of the use case</span>
+  </div>
+</section>
+
+<!-- ============ FORM ============ -->
+<section id="form">
+  <span class="eyebrow">1b · Access request form</span>
+  <h2>One form for any ticketing portal</h2>
+  <p class="lede">Every choice is a dropdown fed from the metamodel, so a request can only name a real person, a real role and a valid operating unit. Build the same fields in ServiceNow, Jira Service Management, Freshservice or Power Apps from the form spec and choice list files. Try the preview below; it runs the same checks the portal should run.</p>
+  <div class="grid g2">
+    <form class="card" id="reqForm" novalidate>
+      <h3>Data access request</h3>
+      <div class="fgrid">
+        <label for="f_type">Request type</label>
+        <select id="f_type"><option value="New">New access</option><option value="Extend">Extend existing access</option><option value="Remove">Remove access</option></select>
+        <label for="f_user">Who needs access</label>
+        <select id="f_user"></select>
+        <label for="f_mgr">Line manager</label>
+        <input id="f_mgr" readonly value="Filled from directory">
+        <label for="f_domain">Data domain</label>
+        <select id="f_domain"><option value="">Choose…</option><option>Procurement</option><option>Payables</option></select>
+        <label for="f_role">Access role</label>
+        <select id="f_role" disabled><option value="">Choose a domain first</option></select>
+        <label for="f_layer">Data layer</label>
+        <input id="f_layer" readonly>
+        <label for="f_scope">Operating unit</label>
+        <select id="f_scope" disabled><option value="">Choose a role first</option></select>
+        <label for="f_start">Start date</label>
+        <input id="f_start" type="date">
+        <label for="f_end">End date</label>
+        <input id="f_end" type="date">
+        <label for="f_reason">Reason</label>
+        <select id="f_reason"><option value="">Choose…</option><option>New joiner</option><option>Role change</option><option>Project</option><option>Audit</option><option>Cover for colleague</option></select>
+        <label for="f_just">Business justification</label>
+        <div><textarea id="f_just" rows="3" maxlength="500" placeholder="At least 30 characters: what the person will do with the data"></textarea><span class="hint" id="f_count">0 / 500</span></div>
+        <label for="f_appr">Approver</label>
+        <input id="f_appr" readonly>
+      </div>
+      <label class="ack"><input type="checkbox" id="f_ack"> I confirm this access is needed for the job and the KDD data handling policy will be followed.</label>
+      <div class="actions"><button type="submit" id="f_submit">Submit request</button><button type="button" id="f_reset" class="ghost">Reset</button></div>
+    </form>
+    <div class="card" aria-live="polite">
+      <h3>Result</h3>
+      <div id="f_result"><p class="lede">Fill the form and press Submit. Errors appear here; a valid request shows the row written to <code>sec.AccessRequest</code>.</p></div>
+      <h3>Checks the portal runs</h3>
+      <ul class="plain">
+        <li><b>V1</b> person is active in sec.UserProfile</li>
+        <li><b>V2</b> no overlapping request for the same role and scope (use Extend)</li>
+        <li><b>V3</b> end date within the role's maximum days</li>
+        <li><b>V4</b> department matches the role, where the role requires one</li>
+        <li><b>V5</b> segregation of duties against sec.RoleConflict</li>
+        <li><b>V6</b> requester cannot approve their own request</li>
+      </ul>
+      <p class="lede">Try: Ahmed Hassan + Procurement buyer + OU 103 (V5), Sam Patel + Treasury analyst (V4), Khalid Al-Azmi (V1).</p>
+    </div>
+  </div>
+  <div class="tablewrap"><table>
+    <thead><tr><th>Field</th><th>Type</th><th>Source of values</th><th>Rule</th><th>Writes to</th></tr></thead>
+    <tbody>
+      <tr><td>Request type</td><td>Dropdown</td><td>New · Extend · Remove</td><td>Extend/Remove shows the person's current grants instead of domain and role</td><td class="mono">RequestType</td></tr>
+      <tr><td>Who needs access</td><td>User picker</td><td>Entra ID directory, active users</td><td>No free text, so no misspelt names</td><td class="mono">UserId</td></tr>
+      <tr><td>Data domain</td><td>Dropdown</td><td class="mono">sec.Domain</td><td>Required</td><td>(via role)</td></tr>
+      <tr><td>Access role</td><td>Dependent dropdown</td><td class="mono">sec.RoleTemplate where DomainId = domain</td><td>Only active roles of that domain</td><td class="mono">RoleTemplateId</td></tr>
+      <tr><td>Operating unit</td><td>Dependent dropdown</td><td class="mono">sec.ScopeValue</td><td>101/102/103 for per-OU roles; locked to ALL otherwise</td><td class="mono">ScopeValue</td></tr>
+      <tr><td>Start / end date</td><td>Date pickers</td><td>Calendar</td><td>Start today to +30 days; end after start, at most MaxDays</td><td class="mono">StartDate, EndDate</td></tr>
+      <tr><td>Reason</td><td>Dropdown</td><td>New joiner · Role change · Project · Audit · Cover</td><td>Required</td><td class="mono">ReasonCategory</td></tr>
+      <tr><td>Justification</td><td>Text</td><td>Free text</td><td>30 to 500 characters</td><td class="mono">Justification</td></tr>
+      <tr><td>Approver</td><td>Read-only</td><td class="mono">sec.Domain.OwnerUPN</td><td>Cannot be the requester</td><td class="mono">ApproverUPN</td></tr>
+      <tr><td>Ticket number</td><td>System</td><td>Portal</td><td>Kept for traceability</td><td class="mono">TicketRef</td></tr>
+    </tbody></table></div>
+</section>
+
+<!-- ============ ARCHITECTURE ============ -->
+<section id="arch">
+  <span class="eyebrow">2 · Architecture</span>
+  <h2>Bronze, Silver and Gold per domain, one hidden control plane</h2>
+  <p class="lede">Each domain has three layer workspaces. Business users only ever hold the Viewer role on Gold; data stewards and auditors read Silver through OneLake roles; Bronze is for data engineers only. The security workspace has Admins from the security team and a service principal. Nobody else is in it, so it does not appear in their workspace list or the OneLake catalog.</p>
+  <div class="scroll">
+  <svg viewBox="0 0 1300 740" role="img" aria-label="Architecture: Oracle EBS feeds Bronze, then Silver, then Gold lakehouses in the Procurement and Payables domains; gold feeds consumers; a hidden security workspace writes OneLake roles on Silver and Gold, manages Entra groups and sends mail.">
+<defs>
+<marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" style="fill:var(--muted)"/></marker>
+<marker id="ahs" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" style="fill:var(--sec)"/></marker>
+</defs>
+<rect x="20" y="70" width="165" height="440" rx="10" style="fill:var(--code);stroke:var(--line)"/>
+<text x="34" y="98" font-weight="600" font-size="15">Oracle EBS R12</text>
+<text x="34" y="118" class="t-muted" font-size="12">simulated: CSV per table</text>
+<text x="34" y="160" class="t-mono" font-size="11.5">PO_HEADERS_ALL</text>
+<text x="34" y="178" class="t-mono" font-size="11.5">PO_LINES_ALL</text>
+<text x="34" y="196" class="t-mono" font-size="11.5">PO_DISTRIBUTIONS_ALL</text>
+<text x="34" y="214" class="t-mono" font-size="11.5">PO_REQUISITION_*</text>
+<text x="34" y="232" class="t-mono" font-size="11.5">RCV_TRANSACTIONS …</text>
+<text x="34" y="290" class="t-mono" font-size="11.5">AP_SUPPLIERS</text>
+<text x="34" y="308" class="t-mono" font-size="11.5">AP_INVOICES_ALL</text>
+<text x="34" y="326" class="t-mono" font-size="11.5">AP_INVOICE_LINES_ALL</text>
+<text x="34" y="344" class="t-mono" font-size="11.5">AP_CHECKS_ALL</text>
+<text x="34" y="362" class="t-mono" font-size="11.5">IBY_EXT_BANK_ACC…</text>
+<text x="34" y="420" class="t-mono" font-size="11.5">HR_OPERATING_UNITS</text>
+<text x="34" y="438" class="t-mono" font-size="11.5">MTL_SYSTEM_ITEMS_B</text>
+<text x="34" y="456" class="t-mono" font-size="11.5">MTL_CATEGORIES_B</text>
+<rect x="205" y="20" width="610" height="300" rx="12" style="fill:var(--prc-soft);stroke:var(--prc)"/>
+<text x="223" y="46" class="t-prc" font-weight="700" font-size="15">Domain · Procurement</text>
+<rect x="220" y="62" width="186" height="240" rx="8" style="fill:var(--bronze-soft);stroke:var(--bronze)" stroke-width="1.6"/>
+<text x="233" y="86" font-weight="600" font-size="13">WS-PRC-Bronze</text>
+<text x="233" y="104" class="t-muted" font-size="11">Data engineers only</text>
+<rect x="233" y="118" width="160" height="48" rx="6" style="fill:var(--panel);stroke:var(--bronze)"/>
+<text x="243" y="138" class="t-mono" font-size="12">LH_PRC_Bronze</text>
+<text x="243" y="155" class="t-muted" font-size="11">schema ebs · raw, as landed</text>
+<rect x="233" y="176" width="160" height="38" rx="6" style="fill:var(--panel);stroke:var(--line)"/>
+<text x="243" y="200" class="t-mono" font-size="12">NB_PRC_Load</text>
+<text x="233" y="268" class="t-muted" font-size="11">No business access</text>
+<rect x="418" y="62" width="186" height="240" rx="8" style="fill:var(--silver-soft);stroke:var(--silver)" stroke-width="1.6"/>
+<text x="431" y="86" font-weight="600" font-size="13">WS-PRC-Silver</text>
+<text x="431" y="104" class="t-muted" font-size="11">Engineers · stewards · auditors</text>
+<rect x="431" y="118" width="160" height="48" rx="6" style="fill:var(--panel);stroke:var(--silver)"/>
+<text x="441" y="138" class="t-mono" font-size="12">LH_PRC_Silver</text>
+<text x="441" y="155" class="t-muted" font-size="11">typed, deduped, conformed</text>
+<rect x="431" y="176" width="160" height="38" rx="6" style="fill:var(--panel);stroke:var(--line)"/>
+<text x="441" y="200" class="t-mono" font-size="12">NB_PRC_Conform</text>
+<text x="431" y="268" class="t-muted" font-size="11">OneLake roles: steward,</text>
+<text x="431" y="284" class="t-muted" font-size="11">auditor (RLS on org_id)</text>
+<rect x="616" y="62" width="186" height="240" rx="8" style="fill:var(--gold-soft);stroke:var(--gold)" stroke-width="1.6"/>
+<text x="629" y="86" font-weight="600" font-size="13">WS-PRC-Gold</text>
+<text x="629" y="104" class="t-muted" font-size="11">Viewer: consumer groups</text>
+<rect x="629" y="118" width="160" height="48" rx="6" style="fill:var(--panel);stroke:var(--gold)"/>
+<text x="639" y="138" class="t-mono" font-size="12">LH_PRC_Gold</text>
+<text x="639" y="155" class="t-muted" font-size="11">star schema · roles here</text>
+<rect x="629" y="176" width="160" height="38" rx="6" style="fill:var(--panel);stroke:var(--line)"/>
+<text x="639" y="200" class="t-mono" font-size="12">SM_Procurement</text>
+<rect x="629" y="222" width="160" height="38" rx="6" style="fill:var(--panel);stroke:var(--line)"/>
+<text x="639" y="246" class="t-mono" font-size="12">DA_Procurement</text>
+<rect x="205" y="340" width="610" height="300" rx="12" style="fill:var(--ap-soft);stroke:var(--ap)"/>
+<text x="223" y="366" class="t-ap" font-weight="700" font-size="15">Domain · Payables</text>
+<rect x="220" y="382" width="186" height="240" rx="8" style="fill:var(--bronze-soft);stroke:var(--bronze)" stroke-width="1.6"/>
+<text x="233" y="406" font-weight="600" font-size="13">WS-AP-Bronze</text>
+<text x="233" y="424" class="t-muted" font-size="11">Data engineers only</text>
+<rect x="233" y="438" width="160" height="48" rx="6" style="fill:var(--panel);stroke:var(--bronze)"/>
+<text x="243" y="458" class="t-mono" font-size="12">LH_AP_Bronze</text>
+<text x="243" y="475" class="t-muted" font-size="11">schema ebs · raw, as landed</text>
+<rect x="233" y="496" width="160" height="38" rx="6" style="fill:var(--panel);stroke:var(--line)"/>
+<text x="243" y="520" class="t-mono" font-size="12">NB_AP_Load</text>
+<text x="233" y="588" class="t-muted" font-size="11">No business access</text>
+<rect x="418" y="382" width="186" height="240" rx="8" style="fill:var(--silver-soft);stroke:var(--silver)" stroke-width="1.6"/>
+<text x="431" y="406" font-weight="600" font-size="13">WS-AP-Silver</text>
+<text x="431" y="424" class="t-muted" font-size="11">Engineers · stewards · auditors</text>
+<rect x="431" y="438" width="160" height="48" rx="6" style="fill:var(--panel);stroke:var(--silver)"/>
+<text x="441" y="458" class="t-mono" font-size="12">LH_AP_Silver</text>
+<text x="441" y="475" class="t-muted" font-size="11">typed, deduped, conformed</text>
+<rect x="431" y="496" width="160" height="38" rx="6" style="fill:var(--panel);stroke:var(--line)"/>
+<text x="441" y="520" class="t-mono" font-size="12">NB_AP_Conform</text>
+<text x="431" y="588" class="t-muted" font-size="11">OneLake roles: steward,</text>
+<text x="431" y="604" class="t-muted" font-size="11">auditor (RLS on org_id)</text>
+<rect x="616" y="382" width="186" height="240" rx="8" style="fill:var(--gold-soft);stroke:var(--gold)" stroke-width="1.6"/>
+<text x="629" y="406" font-weight="600" font-size="13">WS-AP-Gold</text>
+<text x="629" y="424" class="t-muted" font-size="11">Viewer: consumer groups</text>
+<rect x="629" y="438" width="160" height="48" rx="6" style="fill:var(--panel);stroke:var(--gold)"/>
+<text x="639" y="458" class="t-mono" font-size="12">LH_AP_Gold</text>
+<text x="639" y="475" class="t-muted" font-size="11">star schema · roles here</text>
+<rect x="629" y="496" width="160" height="38" rx="6" style="fill:var(--panel);stroke:var(--line)"/>
+<text x="639" y="520" class="t-mono" font-size="12">SM_Payables</text>
+<rect x="629" y="542" width="160" height="38" rx="6" style="fill:var(--panel);stroke:var(--line)"/>
+<text x="639" y="566" class="t-mono" font-size="12">DA_Payables</text>
+<rect x="850" y="20" width="430" height="420" rx="12" style="fill:var(--sec-soft);stroke:var(--sec)" stroke-dasharray="7 5"/>
+<text x="868" y="46" class="t-sec" font-weight="700" font-size="15">WS-SEC-Control  (hidden)</text>
+<text x="868" y="66" class="t-muted" font-size="11.5">Admins: security team (Uma) + spn-fabric-secops · nothing shared</text>
+<rect x="868" y="82" width="394" height="70" rx="8" style="fill:var(--panel);stroke:var(--sec)"/>
+<text x="882" y="106" class="t-mono" font-size="12.5" font-weight="500">SQLDB_SecMeta</text>
+<text x="882" y="124" class="t-muted" font-size="11.5">Fabric SQL database · schema sec · 15 tables</text>
+<text x="882" y="141" class="t-muted" font-size="11.5">who · what · how · generated · evidence</text>
+<rect x="868" y="164" width="190" height="62" rx="8" style="fill:var(--panel);stroke:var(--line)"/>
+<text x="880" y="188" class="t-mono" font-size="12">NB_SEC_Sync</text><text x="880" y="206" class="t-muted" font-size="11">compile + apply roles</text>
+<rect x="1072" y="164" width="190" height="62" rx="8" style="fill:var(--panel);stroke:var(--line)"/>
+<text x="1084" y="188" class="t-mono" font-size="12">PL_SEC_Lifecycle</text><text x="1084" y="206" class="t-muted" font-size="11">daily 06:00 · expiry · mail</text>
+<rect x="868" y="238" width="190" height="62" rx="8" style="fill:var(--panel);stroke:var(--line)"/>
+<text x="880" y="262" class="t-mono" font-size="12">RPT_SEC_Admin</text><text x="880" y="280" class="t-muted" font-size="11">who has what, until when</text>
+<rect x="1072" y="238" width="190" height="62" rx="8" style="fill:var(--panel);stroke:var(--line)"/>
+<text x="1084" y="262" class="t-mono" font-size="12">Key Vault ref</text><text x="1084" y="280" class="t-muted" font-size="11">SPN secret, never in code</text>
+<text x="868" y="330" class="t-muted" font-size="11.5">APIs called by NB_SEC_Sync as the service principal:</text>
+<text x="868" y="350" class="t-mono" font-size="11.5">PUT  …/items/{id}/dataAccessRoles   (Silver + Gold)</text>
+<text x="868" y="368" class="t-mono" font-size="11.5">POST …/workspaces/{id}/roleAssignments</text>
+<text x="868" y="386" class="t-mono" font-size="11.5">POST graph /groups/{id}/members/$ref</text>
+<text x="868" y="404" class="t-mono" font-size="11.5">DELETE graph …/members/{id}/$ref</text>
+<rect x="850" y="470" width="205" height="66" rx="10" style="fill:var(--panel);stroke:var(--line)"/>
+<text x="866" y="496" font-weight="600" font-size="13">Microsoft Entra ID</text><text x="866" y="516" class="t-muted" font-size="11.5">grp-ol-* role groups</text>
+<rect x="1075" y="470" width="205" height="66" rx="10" style="fill:var(--panel);stroke:var(--line)"/>
+<text x="1091" y="496" font-weight="600" font-size="13">Outlook (Office 365)</text><text x="1091" y="516" class="t-muted" font-size="11.5">enable · expiry · revoke mail</text>
+<rect x="850" y="556" width="430" height="66" rx="10" style="fill:var(--panel);stroke:var(--line)"/>
+<text x="866" y="582" font-weight="600" font-size="13">Purview audit log</text><text x="866" y="602" class="t-muted" font-size="11.5">platform record of role changes, beside sec.AuditLog</text>
+<text x="20" y="676" class="t-muted" font-size="12" font-weight="600">CONSUMERS (all run as the signed-in user)</text>
+<g font-size="12">
+<rect x="20" y="688" width="175" height="38" rx="19" style="fill:var(--panel);stroke:var(--line)"/><text x="40" y="712">SQL analytics endpoint</text>
+<rect x="211" y="688" width="140" height="38" rx="19" style="fill:var(--panel);stroke:var(--line)"/><text x="231" y="712">Spark notebook</text>
+<rect x="367" y="688" width="165" height="38" rx="19" style="fill:var(--panel);stroke:var(--line)"/><text x="387" y="712">Power BI + Copilot</text>
+<rect x="548" y="688" width="185" height="38" rx="19" style="fill:var(--panel);stroke:var(--line)"/><text x="568" y="712">Fabric IQ · data agent</text>
+<rect x="749" y="688" width="185" height="38" rx="19" style="fill:var(--panel);stroke:var(--line)"/><text x="769" y="712">Microsoft 365 Copilot</text>
+<rect x="950" y="688" width="230" height="38" rx="19" style="fill:var(--panel);stroke:var(--line)"/><text x="970" y="712">Foundry agent (Fabric IQ tool)</text>
+</g>
+<path d="M185 190 H229" style="stroke:var(--muted);fill:none" stroke-width="1.6" marker-end="url(#ah)"/>
+<path d="M185 330 C207 330 207 462 229 462" style="stroke:var(--muted);fill:none" stroke-width="1.6" marker-end="url(#ah)"/>
+<path d="M393 160 H427" style="stroke:var(--muted);fill:none" stroke-width="1.6" marker-end="url(#ah)"/>
+<path d="M591 160 H625" style="stroke:var(--muted);fill:none" stroke-width="1.6" marker-end="url(#ah)"/>
+<path d="M393 480 H427" style="stroke:var(--muted);fill:none" stroke-width="1.6" marker-end="url(#ah)"/>
+<path d="M591 480 H625" style="stroke:var(--muted);fill:none" stroke-width="1.6" marker-end="url(#ah)"/>
+<path d="M505 440 V306" style="stroke:var(--ap);fill:none" stroke-width="1.4" stroke-dasharray="4 4" marker-end="url(#ah)"/>
+<text x="512" y="330" class="t-ap" font-size="10.5">supplier shortcut</text>
+<path d="M868 195 C832 195 832 160 793 160" style="stroke:var(--sec);fill:none" stroke-width="2" stroke-dasharray="6 4" marker-end="url(#ahs)"/>
+<path d="M868 205 C826 212 826 480 793 480" style="stroke:var(--sec);fill:none" stroke-width="2" stroke-dasharray="6 4" marker-end="url(#ahs)"/>
+<text x="822" y="330" class="t-sec" font-size="11" font-weight="600" text-anchor="middle">roles</text>
+<path d="M940 414 V466" style="stroke:var(--sec);fill:none" stroke-width="1.6" stroke-dasharray="6 4" marker-end="url(#ahs)"/>
+<path d="M1167 414 V466" style="stroke:var(--sec);fill:none" stroke-width="1.6" stroke-dasharray="6 4" marker-end="url(#ahs)"/>
+<path d="M709 622 V682" style="stroke:var(--muted);fill:none" stroke-width="1.6" marker-end="url(#ah)"/>
+</svg>
+  </div>
+  <div class="legend">
+    <span><i class="sw" style="background:var(--prc)"></i>Procurement</span>
+    <span><i class="sw" style="background:var(--ap)"></i>Payables</span>
+    <span><i class="sw" style="background:var(--bronze)"></i>Bronze: raw EBS</span>
+    <span><i class="sw" style="background:var(--silver)"></i>Silver: cleaned, conformed</span>
+    <span><i class="sw" style="background:var(--gold)"></i>Gold: star schema for consumers</span>
+    <span><i class="sw" style="background:var(--sec)"></i>Security control plane (dashed = writes roles, groups, mail)</span>
+  </div>
+  <div class="grid g3">
+    <div class="card"><h3>Four access layers, one source of truth</h3><ul class="plain">
+      <li><b>RBAC</b>: Viewer on WS-*-Gold for consumer groups, on WS-*-Silver for steward and auditor groups.</li>
+      <li><b>OLS</b>: role <code>Path</code> lists only the tables the role may read.</li>
+      <li><b>RLS</b>: role row constraint, <code>WHERE org_id = 102</code>.</li>
+      <li><b>CLS</b>: role column constraint lists allowed columns.</li></ul></div>
+    <div class="card"><h3>Why the workspace stays hidden</h3><p>A Fabric workspace is visible only to people holding a workspace role or an item share. The control plane has no Viewer, Contributor or shares. Fabric administrators can still see it in the admin portal; that is expected and cannot be switched off.</p></div>
+    <div class="card"><h3>Why groups, not users, in roles</h3><p>OneLake roles reference Entra groups. Granting or revoking a person is a Graph membership change, so role JSON only changes when a new scope (a new OU or role type) appears. Fewer role rewrites, smaller blast radius.</p></div>
+  </div>
+</section>
+
+<!-- ============ BRONZE ============ -->
+<section id="bronze">
+  <span class="eyebrow">3 · Bronze, Silver, Gold layers</span>
+  <h2>Oracle EBS tables we will generate</h2>
+  <p class="lede">Column names follow EBS R12 so the lab feels real. Every transactional table carries <code>ORG_ID</code> (the operating unit), which is what RLS filters on. Row counts are the planned sample size.</p>
+  <div class="tablewrap"><table>
+    <thead><tr><th>Lakehouse</th><th>EBS table</th><th>Rows</th><th>Key columns</th><th>Security interest</th></tr></thead>
+    <tbody>
+      <tr><td><span class="pill p-prc">LH_PRC_Bronze</span></td><td class="mono">PO_HEADERS_ALL</td><td class="num">60</td><td class="mono">PO_HEADER_ID, SEGMENT1, VENDOR_ID, ORG_ID, CURRENCY_CODE, AUTHORIZATION_STATUS</td><td>RLS on ORG_ID</td></tr>
+      <tr><td><span class="pill p-prc">LH_PRC_Bronze</span></td><td class="mono">PO_LINES_ALL</td><td class="num">180</td><td class="mono">PO_LINE_ID, PO_HEADER_ID, ITEM_ID, CATEGORY_ID, QUANTITY, UNIT_PRICE, ORG_ID</td><td>CLS on UNIT_PRICE (planners)</td></tr>
+      <tr><td><span class="pill p-prc">LH_PRC_Bronze</span></td><td class="mono">PO_DISTRIBUTIONS_ALL</td><td class="num">180</td><td class="mono">PO_DISTRIBUTION_ID, PO_LINE_ID, CODE_COMBINATION_ID, ORG_ID</td><td>RLS</td></tr>
+      <tr><td><span class="pill p-prc">LH_PRC_Bronze</span></td><td class="mono">PO_REQUISITION_HEADERS_ALL / _LINES_ALL</td><td class="num">40 / 90</td><td class="mono">REQUISITION_HEADER_ID, PREPARER_ID, ORG_ID</td><td>RLS</td></tr>
+      <tr><td><span class="pill p-prc">LH_PRC_Bronze</span></td><td class="mono">RCV_SHIPMENT_HEADERS / RCV_TRANSACTIONS</td><td class="num">50 / 150</td><td class="mono">SHIPMENT_HEADER_ID, TRANSACTION_TYPE, PO_LINE_ID, ORG_ID</td><td>RLS</td></tr>
+      <tr><td><span class="pill p-prc">LH_PRC_Bronze</span></td><td class="mono">MTL_SYSTEM_ITEMS_B / MTL_CATEGORIES_B</td><td class="num">30 / 6</td><td class="mono">INVENTORY_ITEM_ID, SEGMENT1, CATEGORY_ID (Dairy, Ice cream, Juices, Culinary, Raw materials, Packaging)</td><td>none (reference)</td></tr>
+      <tr><td><span class="pill p-ap">LH_AP_Bronze</span></td><td class="mono">AP_SUPPLIERS / AP_SUPPLIER_SITES_ALL</td><td class="num">15 / 25</td><td class="mono">VENDOR_ID, VENDOR_NAME, VAT_REGISTRATION_NUM, VENDOR_SITE_ID, ORG_ID</td><td>CLS on VAT_REGISTRATION_NUM</td></tr>
+      <tr><td><span class="pill p-ap">LH_AP_Bronze</span></td><td class="mono">AP_INVOICES_ALL</td><td class="num">120</td><td class="mono">INVOICE_ID, INVOICE_NUM, VENDOR_ID, INVOICE_AMOUNT, PAYMENT_STATUS_FLAG, ORG_ID</td><td>RLS</td></tr>
+      <tr><td><span class="pill p-ap">LH_AP_Bronze</span></td><td class="mono">AP_INVOICE_LINES_ALL / _DISTRIBUTIONS_ALL</td><td class="num">240 / 240</td><td class="mono">LINE_NUMBER, PO_HEADER_ID, AMOUNT, ORG_ID</td><td>RLS</td></tr>
+      <tr><td><span class="pill p-ap">LH_AP_Bronze</span></td><td class="mono">AP_PAYMENT_SCHEDULES_ALL</td><td class="num">120</td><td class="mono">INVOICE_ID, DUE_DATE, AMOUNT_REMAINING</td><td>RLS</td></tr>
+      <tr><td><span class="pill p-ap">LH_AP_Bronze</span></td><td class="mono">AP_CHECKS_ALL / AP_INVOICE_PAYMENTS_ALL</td><td class="num">70 / 90</td><td class="mono">CHECK_ID, CHECK_NUMBER, AMOUNT, BANK_ACCOUNT_NAME, ORG_ID</td><td>RLS · treasury only</td></tr>
+      <tr><td><span class="pill p-ap">LH_AP_Bronze</span></td><td class="mono">IBY_EXT_BANK_ACCOUNTS</td><td class="num">15</td><td class="mono">EXT_BANK_ACCOUNT_ID, BANK_ACCOUNT_NUM, IBAN, VENDOR_ID</td><td>OLS: treasury only</td></tr>
+      <tr><td><span class="pill p-ap">LH_AP_Bronze</span></td><td class="mono">AP_TERMS · HR_OPERATING_UNITS</td><td class="num">4 · 3</td><td class="mono">TERM_ID, NAME · ORGANIZATION_ID 101 Kuwait / 102 KSA / 103 UAE</td><td>none (reference)</td></tr>
+    </tbody></table></div>
+  <div class="grid g3">
+    <div class="card" style="border-top:4px solid var(--bronze)"><h3>Bronze · LH_*_Bronze</h3><p>EBS tables exactly as landed, all strings, plus load date and file name. Data engineers only; no OneLake roles needed.</p></div>
+    <div class="card" style="border-top:4px solid var(--silver)"><h3>Silver · LH_*_Silver</h3><p>Typed and deduplicated, EBS codes decoded (status flags, payment terms), amounts in source currency plus KWD, supplier history as SCD Type 2. Tables keep EBS grain, for example <code>silver.po_line</code>, <code>silver.invoice</code>, <code>silver.supplier</code>. Stewards and auditors read it through OneLake roles with RLS on <code>org_id</code>.</p></div>
+    <div class="card" style="border-top:4px solid var(--gold)"><h3>Gold · LH_*_Gold</h3><p>Star schema built for reporting and AI. Every business persona, semantic model and data agent reads Gold.</p></div>
+  </div>
+  <p class="lede">Gold then builds <code>dim_supplier</code>, <code>dim_item</code>, <code>dim_org</code>, <code>dim_date</code>, <code>fact_purchase_order</code>, <code>fact_receipt</code> (Procurement) and <code>fact_invoice</code>, <code>fact_payment</code>, <code>dim_bank_account</code> (Payables), keeping <code>org_id</code> on every fact.</p>
+</section>
+
+<!-- ============ METAMODEL ============ -->
+<section id="model">
+  <span class="eyebrow">4 · Security metamodel · SQLDB_SecMeta, schema sec</span>
+  <h2>Fifteen tables in five groups</h2>
+  <p class="lede">You maintain the first three groups. The sync engine writes the last two. Sample data script <code>05_SEC_Metamodel_Sample.sql</code> seeds 15 people, 8 role templates, 16 requests in every status, 12 compiled role bindings, 5 sync runs, 61 audit rows and 17 notifications. <b>PK</b> primary key, <b>FK</b> foreign key.</p>
+  <div class="grid g3">
+    <div class="cluster"><span class="eyebrow">Who · people and their requests</span>
+      <div class="tbl who"><h4>sec.UserProfile <span class="tag">you</span></h4><ul>
+        <li><b>PK</b>UserId</li><li><b></b>UPN, EntraObjectId</li><li><b></b>DisplayName, JobTitle, Department</li><li><b></b>CostCentre, Country, ManagerUPN</li><li><b></b>EmploymentStatus (Active / Leaver)</li></ul></div>
+      <div class="tbl who"><h4>sec.AccessRequest <span class="tag">you / approver</span></h4><ul>
+        <li><b>PK</b>RequestId</li><li><b>FK</b>UserId, RoleTemplateId</li><li><b></b>ScopeValue (e.g. 102 or ALL)</li><li><b></b>StartDate, EndDate</li><li><b></b>Justification, ApproverUPN, ApprovedAt</li><li><b></b>Status (Pending, Approved, Active, Expired, Revoked)</li></ul></div>
+    </div>
+    <div class="cluster"><span class="eyebrow">What · the Fabric estate</span>
+      <div class="tbl what"><h4>sec.Domain</h4><ul><li><b>PK</b>DomainId</li><li><b></b>DomainName, FabricDomainId, OwnerUPN</li></ul></div>
+      <div class="tbl what"><h4>sec.Workspace</h4><ul><li><b>PK</b>WorkspaceKey</li><li><b>FK</b>DomainId</li><li><b></b>FabricWorkspaceId, Layer (Bronze/Silver/Gold/Control)</li></ul></div>
+      <div class="tbl what"><h4>sec.Item</h4><ul><li><b>PK</b>ItemKey</li><li><b>FK</b>WorkspaceKey</li><li><b></b>FabricItemId, ItemType, ItemName</li></ul></div>
+      <div class="tbl what"><h4>sec.ScopeValue</h4><ul><li><b>PK</b>ScopeType, ScopeValue</li><li><b></b>ORG_ID 101 UK · 102 IN · 103 EU</li></ul></div>
+    </div>
+    <div class="cluster"><span class="eyebrow">How · role templates and rules</span>
+      <div class="tbl how"><h4>sec.RoleTemplate</h4><ul><li><b>PK</b>RoleTemplateId</li><li><b>FK</b>DomainId</li><li><b></b>RoleCode (PrcBuyer, ApClerk …)</li><li><b></b>ScopeType (ORG_ID / NONE)</li><li><b></b>WorkspaceRole (Viewer), MaxDays</li></ul></div>
+      <div class="tbl how"><h4>sec.RoleConflict <span class="tag">SoD</span></h4><ul><li><b>PK</b>ConflictId</li><li><b></b>RoleCodeA, RoleCodeB</li><li><b></b>ConflictScope (Any / SameScope), Reason</li></ul></div>
+      <div class="tbl how"><h4>sec.ObjectRule <span class="tag">OLS</span></h4><ul><li><b>FK</b>RoleTemplateId, ItemKey</li><li><b></b>TablePath (/Tables/gold/fact_invoice)</li></ul></div>
+      <div class="tbl how"><h4>sec.RowRule <span class="tag">RLS</span></h4><ul><li><b>FK</b>RoleTemplateId, ItemKey</li><li><b></b>TablePath, FilterColumn (org_id)</li></ul></div>
+      <div class="tbl how"><h4>sec.ColumnRule <span class="tag">CLS</span></h4><ul><li><b>FK</b>RoleTemplateId, ItemKey</li><li><b></b>TablePath, AllowedColumns (JSON array)</li></ul></div>
+    </div>
+    <div class="cluster"><span class="eyebrow">Generated · desired state</span>
+      <div class="tbl gen"><h4>sec.RoleBinding <span class="tag">engine</span></h4><ul><li><b>PK</b>RoleName (PrcBuyerOU102)</li><li><b>FK</b>RoleTemplateId, ScopeValue</li><li><b></b>EntraGroupId, ItemKey</li><li><b></b>RoleJson, Hash, AppliedAt</li></ul></div>
+    </div>
+    <div class="cluster"><span class="eyebrow">Evidence · audit and alerts</span>
+      <div class="tbl evi"><h4>sec.SyncRun</h4><ul><li><b>PK</b>RunId</li><li><b></b>StartedAt, EndedAt, DryRun, Trigger</li><li><b></b>RolesChanged, MembersAdded, MembersRemoved, Errors</li></ul></div>
+      <div class="tbl evi"><h4>sec.AuditLog</h4><ul><li><b>PK</b>AuditId</li><li><b>FK</b>RunId, RequestId</li><li><b></b>EventTime, Action (GRANT, REVOKE, ROLE_UPSERT, ROLE_DELETE)</li><li><b></b>Target, BeforeJson, AfterJson, Actor, Outcome</li></ul></div>
+      <div class="tbl evi"><h4>sec.NotificationLog</h4><ul><li><b>PK</b>NotificationId</li><li><b>FK</b>RequestId</li><li><b></b>Type (ENABLED, EXPIRY_T7, EXPIRY_T1, REVOKED)</li><li><b></b>SentTo, Cc, SentAt, Status</li></ul></div>
+    </div>
+    <div class="cluster"><span class="eyebrow">Admin views (report source)</span>
+      <div class="tbl gen"><h4>sec.vw_EffectiveAccess</h4><ul><li><b></b>who · role · domain · tables · RLS value · hidden columns · expires in</li></ul></div>
+      <div class="tbl gen"><h4>sec.vw_ExpiringSoon</h4><ul><li><b></b>EndDate within 7 days, not yet mailed</li></ul></div>
+    </div>
+  </div>
+</section>
+
+<section id="erd">
+  <span class="eyebrow">4b · Entity relationships and data flow</span>
+  <h2>How a request travels through the metamodel</h2>
+  <p class="lede">Solid lines are table relationships (1 to many). Orange numbered lines are the data flow for one grant, UC-1. Dashed boxes are outside the database.</p>
+  <div class="scroll">
+  <svg viewBox="0 0 1100 620" role="img" aria-label="Entity relationship diagram of the security metamodel with seven numbered data flow steps from request form to admin report.">
+    <defs>
+      <marker id="fa" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" style="fill:var(--sec)"/></marker>
+    </defs>
+
+    <!-- ER relationship lines -->
+    <g class="ln">
+      <path d="M425 90 H460"/><path d="M640 90 H675"/><path d="M855 90 H890"/>
+      <path d="M980 140 V220"/><path d="M980 320 V400"/><path d="M765 140 V220"/>
+      <path d="M840 320 L905 400"/><path d="M500 140 L385 220"/><path d="M460 270 H425"/>
+      <path d="M620 220 L715 140"/><path d="M530 320 V400"/><path d="M460 450 H425"/>
+    </g>
+    <g class="card-m t-mono">
+      <text x="429" y="84">1</text><text x="450" y="84">*</text>
+      <text x="644" y="84">*</text><text x="665" y="84">1</text>
+      <text x="859" y="84">*</text><text x="880" y="84">1</text>
+      <text x="986" y="156">1</text><text x="986" y="214">*</text>
+      <text x="986" y="336">1</text><text x="986" y="394">*</text>
+      <text x="771" y="156">1</text><text x="771" y="214">*</text>
+      <text x="850" y="338">*</text><text x="890" y="394">1</text>
+      <text x="482" y="158">*</text><text x="392" y="212">1</text>
+      <text x="449" y="264">*</text><text x="428" y="264">1</text>
+      <text x="628" y="214">*</text><text x="702" y="158">1</text>
+      <text x="516" y="336">1</text><text x="516" y="394">*</text>
+      <text x="449" y="444">*</text><text x="428" y="444">1</text>
+    </g>
+
+    <!-- data flow -->
+    <path class="fl" d="M120 40 V22 H560 V38" marker-end="url(#fa)"/>
+    <path class="fl" d="M565 140 V218" marker-end="url(#fa)"/>
+    <path class="fl" d="M480 220 V200 H130 V218" marker-end="url(#fa)"/>
+    <path class="fl" d="M480 320 V370 H130 V398" marker-end="url(#fa)"/>
+    <path class="fl" d="M585 320 V398" marker-end="url(#fa)"/>
+    <path class="fl" d="M765 500 V543" marker-end="url(#fa)"/>
+    <path class="fl" d="M550 500 V543" marker-end="url(#fa)"/>
+
+    <!-- entities row A -->
+    <rect class="ext" x="30" y="40" width="180" height="100" rx="8"/>
+    <text x="42" y="60" class="card-t">Request form + approval</text>
+    <text x="42" y="82" class="fld">INSERT · Power Apps · UDF</text><text x="42" y="98" class="fld">Approvals card in Teams</text><text x="42" y="114" class="fld">sets Status = Approved</text>
+
+    <rect class="ent" x="245" y="40" width="180" height="100" rx="8"/><path class="hd-who" d="M245 48 a8 8 0 0 1 8 -8 h164 a8 8 0 0 1 8 8 v20 h-180 z"/>
+    <text x="257" y="59" class="card-t">UserProfile</text>
+    <text x="257" y="86" class="fld">PK UserId</text><text x="257" y="102" class="fld">UPN, EntraObjectId</text><text x="257" y="118" class="fld">EmploymentStatus</text>
+
+    <rect class="ent" x="460" y="40" width="180" height="100" rx="8"/><path class="hd-who" d="M460 48 a8 8 0 0 1 8 -8 h164 a8 8 0 0 1 8 8 v20 h-180 z"/>
+    <text x="472" y="59" class="card-t">AccessRequest</text>
+    <text x="472" y="86" class="fld">PK RequestId</text><text x="472" y="102" class="fld">FK UserId, RoleTemplateId</text><text x="472" y="118" class="fld">Scope, Start, End, Status</text>
+
+    <rect class="ent" x="675" y="40" width="180" height="100" rx="8"/><path class="hd-how" d="M675 48 a8 8 0 0 1 8 -8 h164 a8 8 0 0 1 8 8 v20 h-180 z"/>
+    <text x="687" y="59" class="card-t">RoleTemplate</text>
+    <text x="687" y="86" class="fld">PK RoleTemplateId</text><text x="687" y="102" class="fld">FK DomainId</text><text x="687" y="118" class="fld">RoleCode, Scope, MaxDays</text>
+
+    <rect class="ent" x="890" y="40" width="180" height="100" rx="8"/><path class="hd-what" d="M890 48 a8 8 0 0 1 8 -8 h164 a8 8 0 0 1 8 8 v20 h-180 z"/>
+    <text x="902" y="59" class="card-t">Domain</text>
+    <text x="902" y="86" class="fld">PK DomainId</text><text x="902" y="102" class="fld">Procurement, Payables</text><text x="902" y="118" class="fld">FabricDomainId</text>
+
+    <!-- row B -->
+    <rect class="ext" x="30" y="220" width="180" height="100" rx="8"/>
+    <text x="42" y="240" class="card-t">Entra ID group</text>
+    <text x="42" y="262" class="fld">grp-ol-PrcBuyerOU102</text><text x="42" y="278" class="fld">members: datasteward@…</text><text x="42" y="294" class="fld">via Microsoft Graph</text>
+
+    <rect class="ent" x="245" y="220" width="180" height="100" rx="8"/><path class="hd-what" d="M245 228 a8 8 0 0 1 8 -8 h164 a8 8 0 0 1 8 8 v20 h-180 z"/>
+    <text x="257" y="239" class="card-t">ScopeValue</text>
+    <text x="257" y="266" class="fld">PK ScopeType, Value</text><text x="257" y="282" class="fld">101 Kuwait · 102 KSA</text><text x="257" y="298" class="fld">103 UAE</text>
+
+    <rect class="ent" x="460" y="220" width="180" height="100" rx="8"/><path class="hd-gen" d="M460 228 a8 8 0 0 1 8 -8 h164 a8 8 0 0 1 8 8 v20 h-180 z"/>
+    <text x="472" y="239" class="card-t">RoleBinding</text>
+    <text x="472" y="266" class="fld">PK RoleName</text><text x="472" y="282" class="fld">FK RoleTemplateId, Scope</text><text x="472" y="298" class="fld">EntraGroupId, RoleJson</text>
+
+    <rect class="ent" x="675" y="220" width="180" height="100" rx="8"/><path class="hd-how" d="M675 228 a8 8 0 0 1 8 -8 h164 a8 8 0 0 1 8 8 v20 h-180 z"/>
+    <text x="687" y="239" class="card-t">Object / Row / ColumnRule</text>
+    <text x="687" y="266" class="fld">FK RoleTemplateId, ItemKey</text><text x="687" y="282" class="fld">TablePath</text><text x="687" y="298" class="fld">FilterColumn | Columns</text>
+
+    <rect class="ent" x="890" y="220" width="180" height="100" rx="8"/><path class="hd-what" d="M890 228 a8 8 0 0 1 8 -8 h164 a8 8 0 0 1 8 8 v20 h-180 z"/>
+    <text x="902" y="239" class="card-t">Workspace</text>
+    <text x="902" y="266" class="fld">PK WorkspaceKey</text><text x="902" y="282" class="fld">FK DomainId</text><text x="902" y="298" class="fld">Layer: Bronze/Silver/Gold</text>
+
+    <!-- row C -->
+    <rect class="ext" x="30" y="400" width="180" height="100" rx="8"/>
+    <text x="42" y="420" class="card-t">OneLake role</text>
+    <text x="42" y="442" class="fld">PrcBuyerOU102</text><text x="42" y="458" class="fld">on LH_PRC_Gold</text><text x="42" y="474" class="fld">Path + RLS + CLS + group</text>
+
+    <rect class="ent" x="245" y="400" width="180" height="100" rx="8"/><path class="hd-evi" d="M245 408 a8 8 0 0 1 8 -8 h164 a8 8 0 0 1 8 8 v20 h-180 z"/>
+    <text x="257" y="419" class="card-t">SyncRun</text>
+    <text x="257" y="446" class="fld">PK RunId</text><text x="257" y="462" class="fld">StartedAt, DryRun</text><text x="257" y="478" class="fld">RolesChanged, Errors</text>
+
+    <rect class="ent" x="460" y="400" width="180" height="100" rx="8"/><path class="hd-evi" d="M460 408 a8 8 0 0 1 8 -8 h164 a8 8 0 0 1 8 8 v20 h-180 z"/>
+    <text x="472" y="419" class="card-t">AuditLog</text>
+    <text x="472" y="446" class="fld">PK AuditId</text><text x="472" y="462" class="fld">FK RunId, RequestId</text><text x="472" y="478" class="fld">Action, Before/After</text>
+
+    <rect class="ent" x="675" y="400" width="180" height="100" rx="8"/><path class="hd-evi" d="M675 408 a8 8 0 0 1 8 -8 h164 a8 8 0 0 1 8 8 v20 h-180 z"/>
+    <text x="687" y="419" class="card-t">NotificationLog</text>
+    <text x="687" y="446" class="fld">PK NotificationId</text><text x="687" y="462" class="fld">FK RequestId</text><text x="687" y="478" class="fld">Type, SentTo, Status</text>
+
+    <rect class="ent" x="890" y="400" width="180" height="100" rx="8"/><path class="hd-what" d="M890 408 a8 8 0 0 1 8 -8 h164 a8 8 0 0 1 8 8 v20 h-180 z"/>
+    <text x="902" y="419" class="card-t">Item</text>
+    <text x="902" y="446" class="fld">PK ItemKey</text><text x="902" y="462" class="fld">FK WorkspaceKey</text><text x="902" y="478" class="fld">LH_PRC_Gold, LH_AP_Gold</text>
+
+    <!-- row D -->
+    <rect class="ent" x="245" y="545" width="395" height="56" rx="8"/>
+    <text x="257" y="568" class="card-t">vw_EffectiveAccess · vw_ExpiringSoon</text>
+    <text x="257" y="588" class="fld">→ RPT_SEC_Admin (security team only)</text>
+    <rect class="ext" x="675" y="545" width="180" height="56" rx="8"/>
+    <text x="687" y="568" class="card-t">Outlook</text>
+    <text x="687" y="588" class="fld">to user, cc manager</text>
+
+    <!-- flow badges -->
+    <g>
+      <circle class="badge" cx="330" cy="22" r="10"/><text class="badge-t" x="330" y="26" text-anchor="middle">1</text>
+      <circle class="badge" cx="582" cy="180" r="10"/><text class="badge-t" x="582" y="184" text-anchor="middle">2</text>
+      <circle class="badge" cx="200" cy="200" r="10"/><text class="badge-t" x="200" y="204" text-anchor="middle">3</text>
+      <circle class="badge" cx="200" cy="370" r="10"/><text class="badge-t" x="200" y="374" text-anchor="middle">4</text>
+      <circle class="badge" cx="602" cy="360" r="10"/><text class="badge-t" x="602" y="364" text-anchor="middle">5</text>
+      <circle class="badge" cx="782" cy="522" r="10"/><text class="badge-t" x="782" y="526" text-anchor="middle">6</text>
+      <circle class="badge" cx="532" cy="522" r="10"/><text class="badge-t" x="532" y="526" text-anchor="middle">7</text>
+    </g>
+  </svg>
+  </div>
+  <ol class="steps">
+    <li><div><h3>Request</h3><p>The form writes an AccessRequest row for Data Steward, PrcBuyer, scope 102, Pending. The approval card flips it to Approved.</p></div></li>
+    <li><div><h3>Compile</h3><p>NB_SEC_Sync joins the request with RoleTemplate, ScopeValue and the three rule tables, and writes or updates RoleBinding PrcBuyerOU102 with its RoleJson.</p></div></li>
+    <li><div><h3>Groups</h3><p>Graph adds Data Steward to grp-ol-PrcBuyerOU102, the group named in RoleBinding.</p></div></li>
+    <li><div><h3>Roles</h3><p>RoleJson for every binding on LH_PRC_Gold goes out in one PUT to dataAccessRoles.</p></div></li>
+    <li><div><h3>Evidence</h3><p>One SyncRun row for the run, AuditLog rows for the membership change and any role change.</p></div></li>
+    <li><div><h3>Mail</h3><p>A NotificationLog row of type ENABLED is sent through Outlook and marked Sent.</p></div></li>
+    <li><div><h3>Report</h3><p>The views read AccessRequest, RoleBinding and AuditLog; RPT_SEC_Admin shows Data Steward's access and its end date.</p></div></li>
+  </ol>
+</section>
+
+<!-- ============ COMPILE ============ -->
+<section id="compile">
+  <span class="eyebrow">5 · How rows become a OneLake role</span>
+  <h2>Data Steward asks for Buyer access to Saudi Arabia</h2>
+  <div class="grid g2">
+    <div class="card"><h3>Metadata rows</h3>
+<pre><span class="c">-- sec.AccessRequest</span>
+datasteward@… PrcBuyer  ScopeValue=<span class="s">102</span>  2026-11-18 → 2027-02-15  Approved
+
+<span class="c">-- sec.ObjectRule  (PrcBuyer on LH_PRC_Gold)</span>
+/Tables/gold/fact_purchase_order
+/Tables/gold/dim_supplier
+/Tables/gold/dim_item
+/Tables/gold/dim_date
+
+<span class="c">-- sec.RowRule</span>
+/Tables/gold/fact_purchase_order   org_id
+
+<span class="c">-- sec.ColumnRule</span>
+/Tables/gold/dim_supplier  ["supplier_key","supplier_name",
+                            "category","country"]</pre>
+    </div>
+    <div class="card"><h3>Compiled role (one entry of the PUT body)</h3>
+<pre>{
+ <span class="k">"name"</span>: <span class="s">"PrcBuyerOU102"</span>,
+ <span class="k">"decisionRules"</span>: [{
+  <span class="k">"effect"</span>: "Permit",
+  <span class="k">"permission"</span>: [
+   {"attributeName":"Path","attributeValueIncludedIn":[
+     "/Tables/gold/fact_purchase_order","/Tables/gold/dim_supplier",
+     "/Tables/gold/dim_item","/Tables/gold/dim_date"]},
+   {"attributeName":"Action","attributeValueIncludedIn":["Read"]}],
+  <span class="k">"constraints"</span>: {
+   "rows": [{"tablePath":"/Tables/gold/fact_purchase_order",
+     "value":<span class="s">"SELECT * FROM gold.fact_purchase_order WHERE org_id = 102"</span>}],
+   "columns": [{"tablePath":"/Tables/gold/dim_supplier",
+     "columnNames":["supplier_key","supplier_name","category","country"],
+     "columnEffect":"Permit","columnAction":"Read"}]}}],
+ <span class="k">"members"</span>: {"microsoftEntraMembers":[{
+   "tenantId":"&lt;tenant&gt;","objectId":"&lt;grp-ol-PrcBuyerOU102&gt;",
+   "objectType":"Group"}]}
+}</pre>
+    </div>
+  </div>
+  <div class="note"><b>Three rules the compiler must obey.</b> (1) The PUT replaces the item's whole role set, so the engine always sends every role for that lakehouse; anything missing, including <code>DefaultReader</code>, is deleted. (2) RLS predicates are static, so one role per scope value: <code>PrcBuyerOU101</code>, <code>PrcBuyerOU102</code>, <code>PrcBuyerOU103</code>. (3) Keep a table's RLS and CLS in the same role, and avoid putting one person in two roles that secure the same table differently.</div>
+</section>
+
+<!-- ============ SYNC ============ -->
+<section id="sync">
+  <span class="eyebrow">6 · Sync engine · NB_SEC_Sync, run by PL_SEC_Lifecycle</span>
+  <h2>Desired state in, reconciled platform out</h2>
+  <ol class="steps">
+    <li><div><h3>Trigger</h3><p>Daily at 06:00, and on demand after an approver sets a request to Approved.</p></div></li>
+    <li><div><h3>Read desired state</h3><p>Active grants are approved requests where today is between StartDate and EndDate and the user's EmploymentStatus is Active.</p><span class="api">SELECT … FROM sec.AccessRequest JOIN sec.UserProfile …</span></div></li>
+    <li><div><h3>Reconcile Entra groups</h3><p>Create a missing group per role binding, then add and remove members so the group matches the grants exactly.</p><span class="api">Graph: POST /groups · POST /groups/{id}/members/$ref · DELETE …/members/{id}/$ref</span></div></li>
+    <li><div><h3>Compile and diff</h3><p>Build each lakehouse's full role set as JSON, hash it, compare with the last applied hash and the live roles from GET. Unchanged items are skipped.</p><span class="api">GET /v1/workspaces/{ws}/items/{lh}/dataAccessRoles</span></div></li>
+    <li><div><h3>Dry run, then apply</h3><p>Send the body with <code>dryRun=true</code> first to catch validation errors, then apply with the ETag in <code>If-Match</code> so a manual edit made in between is detected, not overwritten.</p><span class="api">PUT /v1/workspaces/{ws}/items/{lh}/dataAccessRoles?dryRun=true → PUT (If-Match)</span></div></li>
+    <li><div><h3>Workspace RBAC</h3><p>Make sure each consumer group holds Viewer on the domain's Gold workspace and nothing more.</p><span class="api">POST /v1/workspaces/{ws}/roleAssignments</span></div></li>
+    <li><div><h3>Write evidence</h3><p>One SyncRun row, one AuditLog row per grant, revoke or role change with before and after JSON.</p></div></li>
+    <li><div><h3>Queue and send mail</h3><p>Insert NotificationLog rows, then the pipeline's Office 365 Outlook activity sends them and marks each Sent or Failed.</p></div></li>
+    <li><div><h3>Refresh admin report</h3><p>RPT_SEC_Admin reads the views; only the security team can open it.</p></div></li>
+  </ol>
+</section>
+
+<!-- ============ LIFECYCLE ============ -->
+<section id="life">
+  <span class="eyebrow">7 · Access lifecycle and mail alerts</span>
+  <h2>Every grant has an end date</h2>
+  <div class="lifecycle">
+    <div class="state req"><h3>Requested</h3><p>Row in AccessRequest, Status Pending. EndDate is capped at the template's MaxDays.</p><div class="mail"><b>To approver:</b> request waiting</div></div>
+    <div class="state act"><h3>Active</h3><p>Approved and StartDate reached. Next sync adds the user to the group.</p><div class="mail"><b>Access enabled</b> to user, cc manager: role, scope, end date</div></div>
+    <div class="state exp"><h3>Expiring</h3><p>Seven and one day before EndDate.</p><div class="mail"><b>Expiry alert</b> T-7 and T-1 to user and approver, with how to extend</div></div>
+    <div class="state ext"><h3>Extended</h3><p>Approver moves EndDate. Audit row records old and new date.</p><div class="mail"><b>Extension confirmed</b> to user</div></div>
+    <div class="state rev"><h3>Revoked</h3><p>EndDate passed, manual revoke, or user marked Leaver. Removed from group on the next run.</p><div class="mail"><b>Access revoked</b> to user, cc manager and security team</div></div>
+  </div>
+  <p class="lede">A revoke takes effect when the user is removed from the Entra group. Allow a short delay before the change reaches every engine, and test it explicitly in phase 7.</p>
+</section>
+
+<!-- ============ MATRIX ============ -->
+<section id="matrix">
+  <span class="eyebrow">8 · Enforcement and test matrix</span>
+  <h2>Where OneLake security holds, and where it needs help</h2>
+  <div class="tablewrap"><table>
+    <thead><tr><th>Surface</th><th>Enforced?</th><th>Condition</th><th>Test with Data Steward (Buyer, OU 102)</th><th>Basis</th></tr></thead>
+    <tbody>
+      <tr><td>Lakehouse SQL analytics endpoint</td><td><span class="pill p-ok">Yes</span></td><td>Endpoint switched to <b>user's identity</b> access mode (default is delegated)</td><td><code>SELECT COUNT(*) … GROUP BY org_id</code> shows only 102; <code>SELECT *</code> on dim_supplier fails, named columns work</td><td><span class="pill p-sec">Docs</span></td></tr>
+      <tr><td>Spark notebook</td><td><span class="pill p-ok">Yes</span></td><td>User is Viewer and role member</td><td>Same counts; hidden columns are silently missing</td><td><span class="pill p-sec">Docs</span></td></tr>
+      <tr><td>Power BI, Direct Lake on OneLake</td><td><span class="pill p-ok">Yes</span></td><td>Model must be Direct Lake on OneLake</td><td>Report visuals show Saudi Arabia POs only</td><td><span class="pill p-sec">Docs</span></td></tr>
+      <tr><td>Power BI import model</td><td><span class="pill p-bad">No</span></td><td>Data is copied into the model</td><td>Add model RLS (the semantic data filters) generated from the same RowRule table</td><td><span class="pill p-sec">Design</span></td></tr>
+      <tr><td>Direct Lake on SQL / DirectQuery</td><td><span class="pill p-warn">Depends</span></td><td>Goes through the SQL endpoint; holds only if the connection runs as the user, not a fixed identity</td><td>Check with SSO on, then off</td><td><span class="pill p-warn">Test it</span></td></tr>
+      <tr><td>Copilot in Power BI</td><td><span class="pill p-ok">Inherits</span></td><td>Answers from the semantic model as the user; paid F2+ capacity</td><td>Ask "total PO value by country"; only Saudi Arabia appears</td><td><span class="pill p-warn">Test it</span></td></tr>
+      <tr><td>Fabric data agent (Fabric IQ)</td><td><span class="pill p-ok">Inherits</span></td><td>Runs as the asking user; paid F2+ capacity; user needs access to agent and data</td><td>Same question in DA_Procurement</td><td><span class="pill p-sec">Docs</span></td></tr>
+      <tr><td>Microsoft 365 Copilot chat</td><td><span class="pill p-ok">Inherits</span></td><td>Data agent published to M365 Copilot; still the user's identity</td><td>Same question from Copilot chat</td><td><span class="pill p-warn">Test it</span></td></tr>
+      <tr><td>Foundry agent</td><td><span class="pill p-ok">Inherits</span></td><td>Fabric IQ tool with identity passthrough; same tenant; Azure AI Developer role. The older Microsoft Fabric tool was retired on 6 Nov 2026</td><td>Same question in a Foundry agent signed in as Data Steward</td><td><span class="pill p-sec">Docs</span></td></tr>
+      <tr><td>Workspace Admin / Member / Contributor</td><td><span class="pill p-bad">No</span></td><td>These roles bypass OneLake roles by design</td><td>Uma sees everything; that is correct</td><td><span class="pill p-sec">Docs</span></td></tr>
+      <tr><td>Non-authorized external engine</td><td><span class="pill p-warn">Blocked</span></td><td>Query is refused if the user cannot see the whole table</td><td>Optional: read via OneLake file API</td><td><span class="pill p-sec">Docs</span></td></tr>
+    </tbody></table></div>
+</section>
+
+<!-- ============ PERSONAS ============ -->
+<section id="personas">
+  <span class="eyebrow">9 · Test personas</span>
+  <h2>Six users, every combination tested once</h2>
+  <p class="lede">Uma and Data Steward already exist. The other four are new test users in your lab tenant.</p>
+  <div class="tablewrap"><table>
+    <thead><tr><th>User</th><th>Role template</th><th>Scope</th><th>Sees</th><th>Cannot see</th><th>Access window</th></tr></thead>
+    <tbody>
+      <tr><td>uma</td><td>Security admin (workspace Admin)</td><td>All</td><td>Everything, plus WS-SEC-Control</td><td>nothing</td><td class="num">permanent</td></tr>
+      <tr><td>datasteward</td><td><span class="pill p-prc">PrcBuyer</span></td><td>OU 102 Saudi Arabia</td><td>KSA POs, receipts, supplier names</td><td>other OUs, VAT number, all Payables</td><td class="num">18 Nov → 15 Feb</td></tr>
+      <tr><td>emma.buyer</td><td><span class="pill p-prc">PrcPlanner</span></td><td>OU 101 Kuwait</td><td>Kuwait PO quantities and dates</td><td>unit_price, po_value</td><td class="num">18 Nov → 31 Dec</td></tr>
+      <tr><td>lukas.ap</td><td><span class="pill p-ap">ApClerk</span></td><td>OU 103 UAE</td><td>UAE invoices and payment status</td><td>bank accounts, other OUs, Procurement</td><td class="num">18 Nov → 15 Feb</td></tr>
+      <tr><td>priya.treasury</td><td><span class="pill p-ap">ApTreasury</span></td><td>All OUs</td><td>Payments and bank accounts</td><td>Procurement</td><td class="num">18 Nov → 31 Mar</td></tr>
+      <tr><td>sam.audit</td><td><span class="pill p-sec">FinAuditor</span></td><td>All OUs, both domains</td><td>Everything except bank and VAT columns</td><td>bank_account_num, iban, vat_registration_num</td><td class="num">18 Nov → 21 Nov (tests expiry mail)</td></tr>
+    </tbody></table></div>
+</section>
+
+<!-- ============ PLAN ============ -->
+<section id="plan">
+  <span class="eyebrow">10 · Build plan</span>
+  <h2>Seven phases, each ends with something you can check</h2>
+  <div class="grid g2">
+    <div class="card phase"><span class="ph">P0</span><h3>Foundations</h3><span></span><p>F2+ capacity (needed for Copilot and data agent tests), six layer workspaces (Bronze, Silver, Gold for each domain) plus WS-SEC-Control, Procurement and Payables domains, service principal with the tenant setting that lets it call Fabric APIs, Key Vault secret.</p></div>
+    <div class="card phase"><span class="ph">P1</span><h3>Bronze data</h3><span></span><p>I give you the EBS CSV files and a loader notebook. Check: row counts per table match section 2.</p></div>
+    <div class="card phase"><span class="ph">P2</span><h3>Silver and Gold</h3><span></span><p>NB_*_Conform cleans Bronze into Silver; a second notebook builds Gold dims and facts with org_id. Check: Silver and Gold totals reconcile to Bronze.</p></div>
+    <div class="card phase"><span class="ph">P3</span><h3>Security metamodel</h3><span></span><p>DDL for the 15 tables, seeded with the six personas and five role templates. Check: vw_EffectiveAccess reads correctly.</p></div>
+    <div class="card phase"><span class="ph">P4</span><h3>Sync engine</h3><span></span><p>NB_SEC_Sync with Graph and OneLake role calls, dry run first. Check: roles appear on both Gold lakehouses, DefaultReader is gone.</p></div>
+    <div class="card phase"><span class="ph">P5</span><h3>Lifecycle and mail</h3><span></span><p>PL_SEC_Lifecycle with expiry logic and Outlook activity. Check: sam.audit gets T-1 and revoked mails.</p></div>
+    <div class="card phase"><span class="ph">P6</span><h3>Audit and admin report</h3><span></span><p>RPT_SEC_Admin on the views, plus Purview audit search for role changes.</p></div>
+    <div class="card phase"><span class="ph">P7</span><h3>Run the test matrix</h3><span></span><p>Each persona against each surface in section 8, results logged in a test sheet.</p></div>
+  </div>
+</section>
+
+
+<style>
+svg .bx{fill:var(--panel);stroke:var(--line);stroke-width:1.2}
+svg .bx.reg{fill:var(--sec-soft);stroke:var(--sec)}
+svg .bx.pl{fill:var(--code);stroke:var(--sec)}
+svg .bx.nb{fill:var(--panel);stroke:var(--sec);stroke-width:1}
+svg .bx.id{fill:var(--ap-soft);stroke:var(--ap)}
+svg .bx.ol{fill:var(--prc-soft);stroke:var(--prc)}
+svg .bx.evi{fill:var(--warn-soft);stroke:var(--warn)}
+svg .bx.ppl{fill:var(--panel);stroke:var(--ink)}
+svg .ar{stroke:var(--ink);stroke-width:1.5;fill:none;marker-end:url(#arr)}
+svg .ar.sec{stroke:var(--sec)}
+svg .num{fill:var(--sec)} svg .num-t{fill:var(--panel);font-family:var(--f-mono);font-size:11px;font-weight:600}
+svg .h{font-size:13px;font-weight:600} svg .s{font-size:11px;fill:var(--muted)} svg .m{font-family:var(--f-mono);font-size:10.5px;fill:var(--muted)}
+svg .st-ok{fill:var(--ok-soft)} svg .st-ok-t{fill:var(--ok);font-size:10px;font-weight:600}
+svg .st-w{fill:var(--warn-soft)} svg .st-w-t{fill:var(--warn);font-size:10px;font-weight:600}
+svg .st-b{fill:var(--bad-soft)} svg .st-b-t{fill:var(--bad);font-size:10px;font-weight:600}
+.statgrid{display:grid;gap:10px;grid-template-columns:repeat(auto-fit,minmax(150px,1fr))}
+.stat{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:12px 14px;display:grid;gap:2px}
+.stat b{font-family:var(--f-display);font-size:26px;font-weight:600}
+.stat span{font-size:13px;color:var(--muted)}
+</style>
+
+<section id="flow">
+  <span class="eyebrow">11 · End-to-end flow · as built in the lab tenant, 21 Nov 2026</span>
+  <h2>From a request to what every engine shows</h2>
+  <p class="lede">Read left to right. Numbers follow one request. Badges show what is live today (green), what runs as an MVP stand-in (amber) and what is still to do (red).</p>
+  <div class="scroll">
+  <svg viewBox="0 0 1120 640" role="img" aria-label="End-to-end flow of the OneLake security product">
+    <defs><marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="context-stroke"/></marker></defs>
+
+    <!-- column headers -->
+    <text x="20" y="22" class="m">PEOPLE</text>
+    <text x="220" y="22" class="m">REQUEST AND APPROVAL</text>
+    <text x="480" y="22" class="m">CONTROL PLANE · WS-SEC-Control</text>
+    <text x="790" y="22" class="m">IDENTITY, DATA AND ENGINES</text>
+
+    <!-- people -->
+    <rect class="bx ppl" x="20" y="40" width="160" height="60" rx="8"/>
+    <text x="34" y="66" class="h">Requester</text><text x="34" y="84" class="s">employee or manager</text>
+    <rect class="bx ppl" x="20" y="180" width="160" height="60" rx="8"/>
+    <text x="34" y="206" class="h">Approver</text><text x="34" y="224" class="s">domain owner</text>
+    <rect class="bx ppl" x="20" y="520" width="160" height="60" rx="8"/>
+    <text x="34" y="546" class="h">Internal Audit</text><text x="34" y="564" class="s">report only, no workspace role</text>
+
+    <!-- 1 request -->
+    <rect class="bx" x="220" y="40" width="220" height="80" rx="8"/>
+    <circle class="num" cx="236" cy="58" r="10"/><text class="num-t" x="232" y="62">1</text>
+    <text x="254" y="62" class="h">Access request</text>
+    <text x="234" y="82" class="s">person · role · operating unit · dates</text>
+    <text x="234" y="98" class="m">sec.AccessRequest · Pending</text>
+    <rect class="st-w" x="330" y="104" width="104" height="14" rx="7"/><text class="st-w-t" x="337" y="114">MVP: SQL insert</text>
+
+    <!-- 2 approve -->
+    <rect class="bx" x="220" y="170" width="220" height="80" rx="8"/>
+    <circle class="num" cx="236" cy="188" r="10"/><text class="num-t" x="232" y="192">2</text>
+    <text x="254" y="192" class="h">Approve</text>
+    <text x="234" y="212" class="s">checks: max days, conflicts, scope</text>
+    <text x="234" y="228" class="m">Status → Approved · ApproverUPN</text>
+    <rect class="st-w" x="330" y="234" width="104" height="14" rx="7"/><text class="st-w-t" x="337" y="244">MVP: SQL update</text>
+
+    <!-- register -->
+    <rect class="bx reg" x="480" y="40" width="250" height="210" rx="8"/>
+    <text x="494" y="64" class="h">SQLDB_SecMeta · governed register</text>
+    <text x="494" y="88" class="m">UserProfile · Domain · Item</text>
+    <text x="494" y="106" class="m">RoleTemplate (MaxDays)</text>
+    <text x="494" y="124" class="m">ScopeValue (ORG_ID 101/102/103)</text>
+    <text x="494" y="142" class="m">ObjectRule · RowRule · ColumnRule</text>
+    <text x="494" y="160" class="m">RoleConflict (segregation of duties)</text>
+    <text x="494" y="178" class="m">AccessRequest</text>
+    <text x="494" y="204" class="s">Rules are defined once here;</text>
+    <text x="494" y="220" class="s">nothing is set by hand in the UI.</text>
+    <rect class="st-ok" x="676" y="230" width="48" height="14" rx="7"/><text class="st-ok-t" x="685" y="240">Live</text>
+
+    <!-- 3 pipeline -->
+    <rect class="bx pl" x="480" y="280" width="250" height="210" rx="8"/>
+    <circle class="num" cx="496" cy="298" r="10"/><text class="num-t" x="492" y="302">3</text>
+    <text x="514" y="302" class="h">PL_SEC_Lifecycle · daily 06:00</text>
+    <rect class="bx nb" x="494" y="316" width="222" height="44" rx="6"/>
+    <text x="504" y="334" class="h" style="font-size:12px">NB_SEC_Lifecycle</text><text x="504" y="350" class="s">activate · expire · reject rule breaks</text>
+    <rect class="bx nb" x="494" y="368" width="222" height="44" rx="6"/>
+    <text x="504" y="386" class="h" style="font-size:12px">NB_SEC_Sync</text><text x="504" y="402" class="s">groups · compile roles · dry run · apply</text>
+    <rect class="bx nb" x="494" y="420" width="222" height="44" rx="6"/>
+    <text x="504" y="438" class="h" style="font-size:12px">NB_SEC_Notify</text><text x="504" y="454" class="s">queue and send mails</text>
+    <rect class="st-ok" x="676" y="470" width="48" height="14" rx="7"/><text class="st-ok-t" x="685" y="480">Live</text>
+    <rect class="bx" x="480" y="510" width="250" height="44" rx="8"/>
+    <text x="494" y="530" class="h" style="font-size:12px">spn-fabric-secops</text><text x="494" y="546" class="s">app identity · secret in Key Vault</text>
+
+    <!-- 4 entra -->
+    <rect class="bx id" x="790" y="40" width="310" height="76" rx="8"/>
+    <circle class="num" cx="806" cy="58" r="10"/><text class="num-t" x="802" y="62">4</text>
+    <text x="824" y="62" class="h">Entra ID groups</text>
+    <text x="804" y="82" class="m">grp-ol-&lt;Role&gt;&lt;Scope&gt;, e.g. grp-ol-PrcBuyerOU101</text>
+    <text x="804" y="100" class="s">members = active, approved grants only</text>
+    <rect class="st-ok" x="1046" y="98" width="48" height="14" rx="7"/><text class="st-ok-t" x="1055" y="108">Live</text>
+
+    <!-- 5 onelake -->
+    <rect class="bx ol" x="790" y="140" width="310" height="170" rx="8"/>
+    <circle class="num" cx="806" cy="158" r="10"/><text class="num-t" x="802" y="162">5</text>
+    <text x="824" y="162" class="h">OneLake security roles</text>
+    <rect class="bx" x="804" y="174" width="138" height="54" rx="6"/>
+    <text x="814" y="192" class="h" style="font-size:12px" fill="var(--prc)">Procurement</text><text x="814" y="208" class="m">LH_PRC_Silver</text><text x="814" y="222" class="m">LH_PRC_Gold</text>
+    <rect class="bx" x="950" y="174" width="138" height="54" rx="6"/>
+    <text x="960" y="192" class="h" style="font-size:12px" fill="var(--ap)">Payables</text><text x="960" y="208" class="m">LH_AP_Silver</text><text x="960" y="222" class="m">LH_AP_Gold</text>
+    <text x="804" y="250" class="s">each role: tables + row filter on ORG_ID + allowed columns</text>
+    <text x="804" y="266" class="s">DefaultReader removed · group is workspace Viewer</text>
+    <text x="804" y="282" class="s">drift check: hand edits are reported, not overwritten</text>
+    <rect class="st-ok" x="1046" y="290" width="48" height="14" rx="7"/><text class="st-ok-t" x="1055" y="300">Live</text>
+
+    <!-- 6 engines -->
+    <rect class="bx" x="790" y="334" width="310" height="140" rx="8"/>
+    <circle class="num" cx="806" cy="352" r="10"/><text class="num-t" x="802" y="356">6</text>
+    <text x="824" y="356" class="h">Every engine reads as the user</text>
+    <text x="804" y="378" class="s">SQL analytics endpoint (user's identity mode)</text>
+    <text x="804" y="396" class="s">Spark notebooks</text>
+    <text x="804" y="414" class="s">Power BI on Direct Lake</text>
+    <text x="804" y="432" class="s">Copilot and Fabric data agents (paid capacity)</text>
+    <rect class="st-b" x="990" y="452" width="104" height="14" rx="7"/><text class="st-b-t" x="997" y="462">P7 tests: to do</text>
+
+    <!-- 7 mail -->
+    <rect class="bx" x="790" y="498" width="310" height="56" rx="8"/>
+    <circle class="num" cx="806" cy="516" r="10"/><text class="num-t" x="802" y="520">7</text>
+    <text x="824" y="520" class="h">Mail to user and approver</text>
+    <text x="804" y="540" class="s">enabled · expiry T-7 and T-1 · revoked · rejected</text>
+    <rect class="st-w" x="976" y="508" width="118" height="14" rx="7"/><text class="st-w-t" x="983" y="518">Queued: no mailbox</text>
+
+    <!-- 8 evidence -->
+    <rect class="bx evi" x="220" y="300" width="220" height="120" rx="8"/>
+    <circle class="num" cx="236" cy="318" r="10"/><text class="num-t" x="232" y="322">8</text>
+    <text x="254" y="322" class="h">Evidence</text>
+    <text x="234" y="344" class="m">AuditLog (before / after JSON)</text>
+    <text x="234" y="362" class="m">SyncRun · RoleBinding</text>
+    <text x="234" y="380" class="m">NotificationLog</text>
+    <rect class="st-ok" x="386" y="400" width="48" height="14" rx="7"/><text class="st-ok-t" x="395" y="410">Live</text>
+
+    <!-- 9 report -->
+    <rect class="bx evi" x="220" y="450" width="220" height="104" rx="8"/>
+    <circle class="num" cx="236" cy="468" r="10"/><text class="num-t" x="232" y="472">9</text>
+    <text x="254" y="472" class="h">RPT_SEC_Admin</text>
+    <text x="234" y="492" class="s">effective access · expiring · audit trail</text>
+    <text x="234" y="508" class="s">sync health · notifications</text>
+    <text x="234" y="526" class="m">SM_SEC_Admin on endpoint views</text>
+    <rect class="st-ok" x="386" y="534" width="48" height="14" rx="7"/><text class="st-ok-t" x="395" y="544">Live</text>
+
+    <!-- arrows -->
+    <path class="ar" d="M180 70 H216"/>
+    <path class="ar" d="M330 120 V166"/>
+    <path class="ar" d="M180 210 H216"/>
+    <path class="ar" d="M440 210 H476"/>
+    <path class="ar" d="M440 80 H476"/>
+    <path class="ar sec" d="M605 250 V276"/>
+    <path class="ar sec" d="M716 390 H760 V78 H786"/>
+    <path class="ar sec" d="M760 225 H786"/>
+    <path class="ar" d="M945 116 V136"/>
+    <path class="ar" d="M945 310 V330"/>
+    <path class="ar sec" d="M716 442 H770 V526 H786"/>
+    <path class="ar sec" d="M494 340 H444"/>
+    <path class="ar" d="M330 420 V446"/>
+    <path class="ar" d="M220 540 H184"/>
+    <path class="ar" d="M605 510 V494"/>
+  </svg>
+  </div>
+  <div class="legend"><span><i class="sw" style="background:var(--sec-soft);border:1px solid var(--sec)"></i>Control plane</span><span><i class="sw" style="background:var(--ap-soft);border:1px solid var(--ap)"></i>Identity</span><span><i class="sw" style="background:var(--prc-soft);border:1px solid var(--prc)"></i>Data</span><span><i class="sw" style="background:var(--warn-soft);border:1px solid var(--warn)"></i>Evidence and audit</span><span>Orange arrows: run by the daily pipeline</span></div>
+  <div class="grid g3">
+    <div class="card"><h3>What one request does</h3><p>Emma Clarke asked for Procurement buyer on OU 101 (ACC-00017). After approval the next run made the request Active, added her to <code>grp-ol-PrcBuyerOU101</code>, and the PrcBuyerOU101 role on LH_PRC_Gold already lists that group. She now sees Kuwait purchase orders only, until 21 Dec.</p></div>
+    <div class="card"><h3>What stops bad grants</h3><p>Before anything is applied, the lifecycle step rejects requests that break the role's maximum days, use the wrong scope type, or clash with a role the person already holds (for example buyer and AP clerk on the same unit).</p></div>
+    <div class="card"><h3>What makes it safe to rerun</h3><p>Every run compares the wanted roles with the live ones. Unchanged lakehouses print "no change"; a hand-edited role is reported as drift and left alone unless you force it.</p></div>
+  </div>
+</section>
+
+<section id="status">
+  <span class="eyebrow">12 · Scope status · 21 Nov 2026</span>
+  <h2>What is done and what is left</h2>
+  <div class="statgrid">
+    <div class="stat"><b>6 of 8</b><span>phases done (P0 to P5 core, P6)</span></div>
+    <div class="stat"><b>4</b><span>lakehouses governed by roles</span></div>
+    <div class="stat"><b>11</b><span>Entra groups managed by the sync</span></div>
+    <div class="stat"><b>06:00</b><span>daily run, Kuwait time</span></div>
+  </div>
+  <div class="tablewrap"><table>
+    <thead><tr><th>Phase</th><th>Status</th><th>What was proved</th><th>What is left</th></tr></thead>
+    <tbody>
+      <tr><td><b>P0</b> Foundations</td><td><span class="pill p-ok">Done</span></td><td>14 users, 4 admin groups, app with Graph roles, Key Vault, 7 workspaces, 6 lakehouses, SQLDB_SecMeta on the trial capacity.</td><td>Confirm the Procurement and Payables domains exist in the admin portal. Paid F2 capacity in KDD for Copilot and data agent tests.</td></tr>
+      <tr><td><b>P1</b> Bronze data</td><td><span class="pill p-ok">Done</span></td><td>Simulated EBS extract loaded for both domains.</td><td>None for the MVP.</td></tr>
+      <tr><td><b>P2</b> Silver and Gold</td><td><span class="pill p-ok">Done</span></td><td>Conform and Gold notebooks ran; supplier shortcut from Payables to Procurement.</td><td>None for the MVP.</td></tr>
+      <tr><td><b>P3</b> Security metamodel</td><td><span class="pill p-ok">Done</span></td><td>15 tables seeded; extra checks for max days, conflicts and scope; vw_EffectiveAccess returns the grants.</td><td>Domain owners and Internal Audit sign off the role, row and column rules.</td></tr>
+      <tr><td><b>P4</b> Sync engine</td><td><span class="pill p-ok">Done</span></td><td>Dry run clean, live apply, second run "no change" on all 4 lakehouses, DefaultReader gone, groups are Viewer.</td><td>Deliberate drift test: edit a role by hand and confirm it is reported.</td></tr>
+      <tr><td><b>P5</b> Lifecycle and mail</td><td><span class="pill p-warn">Core done</span></td><td>Daily pipeline succeeds; approved request became Active and the user joined the group.</td><td>Mail delivery needs a licensed mailbox (stays Queued). Watch the first expiry and revoke on a real run. Request form and approval flow (Power Apps / ServiceNow + Power Automate) instead of SQL inserts. Limit Mail.Send to one mailbox.</td></tr>
+      <tr><td><b>P6</b> Audit and report</td><td><span class="pill p-ok">Done</span></td><td>RPT_SEC_Admin with 5 pages on SM_SEC_Admin.</td><td>Share with Internal Audit as an item share. Purview audit search for role changes. Schedule <code>usp_PurgeEvidence</code> once retention is agreed.</td></tr>
+      <tr><td><b>P7</b> Test matrix</td><td><span class="pill p-bad">Not started</span></td><td>—</td><td>Sign in as each persona and check section 8 surfaces: SQL endpoint, Spark, Power BI Direct Lake, then Copilot and data agent on paid capacity. Log results in a test sheet.</td></tr>
+      <tr><td><b>KDD</b> Replication</td><td><span class="pill p-warn">Ready</span></td><td>All fixes are in the repo; REPLICATE.md is the step-by-step checklist.</td><td>Run it in the KDD tenant with KDD values for tenant, admin, capacity and mailbox.</td></tr>
+    </tbody>
+  </table></div>
+  <div class="note">Fixes found during the lab run and now in the code: Cloud Shell sign-in and consent, Key Vault region fallback, SQL certificate validation through the gateway, the column-permission format in OneLake roles, Entra replication delay, false drift after apply, and report views for the SQL analytics endpoint.</div>
+</section>
+
+<footer>
+  <span class="eyebrow">Sources</span>
+  <a href="https://learn.microsoft.com/en-us/rest/api/fabric/core/onelake-data-access-security/create-or-update-data-access-roles">Create or update data access roles (REST)</a>
+  <a href="https://learn.microsoft.com/en-us/fabric/onelake/security/read-secured-data">Read data secured by OneLake security</a>
+  <a href="https://learn.microsoft.com/en-us/fabric/onelake/security/onelake-security-integrations-overview">OneLake security integrations overview</a>
+  <a href="https://www.gulftalent.com/companies/kuwaiti-danish-dairy-company-kdd">KDD company profile (GulfTalent)</a>
+  <a href="https://www.3blmedia.com/news/sustainable-leadership-middle-east-kuwaiti-danish-dairy-company-joins-wbcsd">KDD joins WBCSD (3BL Media)</a>
+  <a href="https://learn.microsoft.com/en-us/fabric/data-science/data-agent-foundry">Fabric data agent in Foundry (retirement notice, identity passthrough)</a>
+</footer>
+</div>
+
+<script>
+(function(){
+const D={"templates":[{"code":"PrcBuyer","label":"Procurement buyer","domain":"Procurement","scope":"ORG_ID","layers":"Gold","maxDays":180,"dept":null},{"code":"PrcPlanner","label":"Demand planner","domain":"Procurement","scope":"ORG_ID","layers":"Gold","maxDays":180,"dept":null},{"code":"PrcSteward","label":"Procurement data steward","domain":"Procurement","scope":"ALL","layers":"Silver","maxDays":365,"dept":"Data Governance"},{"code":"PrcAuditor","label":"Procurement auditor","domain":"Procurement","scope":"ALL","layers":"Silver, Gold","maxDays":30,"dept":"Internal Audit"},{"code":"ApClerk","label":"AP clerk","domain":"Payables","scope":"ORG_ID","layers":"Gold","maxDays":180,"dept":null},{"code":"ApTreasury","label":"Treasury analyst","domain":"Payables","scope":"ALL","layers":"Gold","maxDays":90,"dept":"Finance - Treasury"},{"code":"ApSteward","label":"Payables data steward","domain":"Payables","scope":"ALL","layers":"Silver","maxDays":365,"dept":"Data Governance"},{"code":"ApAuditor","label":"Payables auditor","domain":"Payables","scope":"ALL","layers":"Silver, Gold","maxDays":30,"dept":"Internal Audit"}],"scopes":[{"v":"101","label":"KDD Kuwait"},{"v":"102","label":"KDD Saudi Arabia"},{"v":"103","label":"KDD UAE"}],"users":[{"upn":"umapragada","name":"Uma Pragada","dept":"Data Governance","status":"Active"},{"upn":"datasteward","name":"Data Steward","dept":"Procurement","status":"Active"},{"upn":"emma.clarke","name":"Emma Clarke","dept":"Procurement","status":"Active"},{"upn":"lukas.weber","name":"Lukas Weber","dept":"Finance - Accounts Payable","status":"Active"},{"upn":"priya.nair","name":"Priya Nair","dept":"Finance - Treasury","status":"Active"},{"upn":"sam.patel","name":"Sam Patel","dept":"Internal Audit","status":"Active"},{"upn":"maryam.alajmi","name":"Maryam Al-Ajmi","dept":"Data Governance","status":"Active"},{"upn":"noura.almutairi","name":"Noura Al-Mutairi","dept":"Procurement","status":"Active"},{"upn":"khalid.alazmi","name":"Khalid Al-Azmi","dept":"Finance - Accounts Payable","status":"Leaver"},{"upn":"reem.alkandari","name":"Reem Al-Kandari","dept":"Procurement","status":"Active"},{"upn":"ahmed.hassan","name":"Ahmed Hassan","dept":"Finance - Accounts Payable","status":"Active"},{"upn":"omar.alrashidi","name":"Omar Al-Rashidi","dept":"Procurement","status":"Active"},{"upn":"fatima.alenezi","name":"Fatima Al-Enezi","dept":"Finance","status":"Active"},{"upn":"yousef.alhajri","name":"Yousef Al-Hajri","dept":"Internal Audit","status":"Active"}],"active":[{"user":"datasteward","role":"PrcBuyer","scope":"102"},{"user":"emma.clarke","role":"PrcPlanner","scope":"101"},{"user":"lukas.weber","role":"ApClerk","scope":"103"},{"user":"lukas.weber","role":"ApClerk","scope":"101"},{"user":"priya.nair","role":"ApTreasury","scope":"ALL"},{"user":"sam.patel","role":"PrcAuditor","scope":"ALL"},{"user":"sam.patel","role":"ApAuditor","scope":"ALL"},{"user":"maryam.alajmi","role":"PrcSteward","scope":"ALL"},{"user":"maryam.alajmi","role":"ApSteward","scope":"ALL"},{"user":"reem.alkandari","role":"PrcPlanner","scope":"102"},{"user":"emma.clarke","role":"PrcBuyer","scope":"101"},{"user":"ahmed.hassan","role":"ApClerk","scope":"103"},{"user":"sam.patel","role":"PrcAuditor","scope":"ALL"}],"conflicts":[{"a":"PrcBuyer","b":"ApClerk","scope":"SameScope","reason":"A buyer may not process invoices for POs in the same operating unit"},{"a":"ApClerk","b":"ApTreasury","scope":"Any","reason":"Invoice entry and payment release must be done by different people"}],"owners":{"Procurement":"omar.alrashidi","Payables":"fatima.alenezi"}};
+const $=id=>document.getElementById(id);
+const today=new Date();today.setHours(0,0,0,0);
+const iso=d=>d.toISOString().slice(0,10);
+const addDays=(d,n)=>{const x=new Date(d);x.setDate(x.getDate()+n);return x};
+const users=D.users;
+$('f_user').innerHTML='<option value="">Search the directory…</option>'+users.map(u=>`<option value="${u.upn}">${u.name} · ${u.dept}${u.status==='Leaver'?' (leaver)':''}</option>`).join('');
+const role=()=>D.templates.find(t=>t.code===$('f_role').value);
+function setDates(){const r=role();$('f_start').min=iso(today);$('f_start').max=iso(addDays(today,30));
+  const st=$('f_start').value?new Date($('f_start').value):today;$('f_end').min=iso(addDays(st,1));if(r)$('f_end').max=iso(addDays(st,r.maxDays));}
+$('f_domain').addEventListener('change',()=>{const d=$('f_domain').value;const opts=D.templates.filter(t=>t.domain===d);
+  $('f_role').disabled=!d;$('f_role').innerHTML=d?'<option value="">Choose…</option>'+opts.map(t=>`<option value="${t.code}">${t.label}</option>`).join(''):'<option value="">Choose a domain first</option>';
+  $('f_appr').value=d?D.owners[d]:'';$('f_layer').value='';$('f_scope').disabled=true;$('f_scope').innerHTML='<option value="">Choose a role first</option>';});
+$('f_role').addEventListener('change',()=>{const r=role();$('f_layer').value=r?r.layers+' · max '+r.maxDays+' days':'';
+  if(!r){$('f_scope').disabled=true;return}
+  if(r.scope==='ALL'){$('f_scope').innerHTML='<option value="ALL">All operating units</option>';$('f_scope').disabled=true}
+  else{$('f_scope').disabled=false;$('f_scope').innerHTML='<option value="">Choose…</option>'+D.scopes.map(s=>`<option value="${s.v}">${s.v} · ${s.label}</option>`).join('')}
+  setDates();});
+$('f_start').addEventListener('change',setDates);
+$('f_user').addEventListener('change',()=>{$('f_mgr').value=$('f_user').value?'Filled from directory':'';});
+$('f_just').addEventListener('input',()=>{$('f_count').textContent=$('f_just').value.length+' / 500'});
+$('f_reset').addEventListener('click',()=>{$('reqForm').reset();$('f_domain').dispatchEvent(new Event('change'));$('f_result').innerHTML='<p class="lede">Form cleared.</p>';$('f_count').textContent='0 / 500'});
+setDates();
+$('reqForm').addEventListener('submit',e=>{e.preventDefault();const errs=[];
+  const u=users.find(x=>x.upn===$('f_user').value);const r=role();const scope=$('f_scope').value;
+  const st=$('f_start').value,en=$('f_end').value;
+  if($('f_type').value!=='New')errs.push('This preview covers New requests. Extend and Remove pick from the person\'s current grants.');
+  if(!u)errs.push('Choose who needs access.');
+  if(!r)errs.push('Choose a data domain and an access role.');
+  if(r&&!scope)errs.push('Choose an operating unit.');
+  if(!st||!en)errs.push('Choose a start and end date.');
+  if(!$('f_reason').value)errs.push('Choose a reason.');
+  if($('f_just').value.trim().length<30)errs.push('Justification needs at least 30 characters.');
+  if(!$('f_ack').checked)errs.push('Confirm the data handling statement.');
+  if(u&&u.status!=='Active')errs.push('V1: '+u.name+' is not an active employee in the access register.');
+  if(u&&r&&D.active.some(a=>a.user===u.upn&&a.role===r.code&&a.scope===scope))errs.push('V2: '+u.name+' already has or has requested this access. Use Extend instead.');
+  if(r&&st&&en){const days=(new Date(en)-new Date(st))/864e5;if(days<=0)errs.push('End date must be after the start date.');else if(days>r.maxDays)errs.push('V3: this role allows at most '+r.maxDays+' days.');
+    if(new Date(st)<today)errs.push('Start date cannot be in the past.');}
+  if(u&&r&&r.dept&&u.dept!==r.dept)errs.push('V4: this role is limited to the '+r.dept+' department.');
+  if(u&&r){D.conflicts.forEach(c=>{[[c.a,c.b],[c.b,c.a]].forEach(([x,y])=>{if(r.code===x&&D.active.some(a=>a.user===u.upn&&a.role===y&&(c.scope==='Any'||a.scope===scope)))errs.push('V5 segregation of duties: '+c.reason+'.')})})}
+  if(u&&r&&D.owners[r.domain]===u.upn)errs.push('V6: the approver cannot be the person receiving access; route to their manager.');
+  const out=$('f_result');
+  if(errs.length){out.innerHTML=errs.map(x=>`<div class="err">${x}</div>`).join('');return}
+  const row={RequestType:'New',UserUPN:u.upn+'@…',RoleCode:r.code,ScopeValue:scope,StartDate:st,EndDate:en,ReasonCategory:$('f_reason').value,Justification:$('f_just').value.trim(),ApproverUPN:D.owners[r.domain]+'@…',Status:'Pending',OneLakeRole:r.code+(scope==='ALL'?'All':'OU'+scope)};
+  out.innerHTML='<div class="okmsg">Valid. The portal would create the ticket and write this row; the approver gets an approval card.</div><pre>'+JSON.stringify(row,null,2).replace(/</g,'&lt;')+'</pre>';
+});
+})();
+</script>
+
+</body></html>
