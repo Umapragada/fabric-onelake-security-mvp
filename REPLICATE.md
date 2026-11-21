@@ -65,6 +65,15 @@ FROM sec.UserProfile u CROSS JOIN (SELECT TOP 1 OwnerUPN FROM sec.Domain) d WHER
 ```
 Then `python P0_2_fabric_deploy.py run` → Emma Clarke appears in `grp-ol-PrcBuyerOU101`.
 
+## G. Admin report (Phase 6, browser only)
+1. SQLDB_SecMeta → top-right drop-down → **SQL analytics endpoint** → New SQL query (empty) → run `P6_endpoint_views.sql`
+   (the endpoint mirrors tables, not views or computed columns). If GitHub shows an old copy, hard-refresh first.
+2. **New semantic model** → `SM_SEC_Admin`, Direct Lake on SQL → ↻ → tick vw_EffectiveAccess, vw_ExpiringSoon, vw_AuditTrail,
+   vw_SyncHealth, vw_NotificationStatus, vw_AccessReview. The ⚠ icons are expected (views use DirectQuery).
+3. **New report** → one Table visual per page: Effective access, Expiring this week, Audit trail, Sync health, Notifications.
+   Set numeric columns like DaysLeft to "Don't summarize". Save as `RPT_SEC_Admin` in WS-SEC-Control.
+4. Share RPT_SEC_Admin with the auditor as an item share (no workspace role).
+
 ## Restore after a Cloud Shell reset
 Nothing in Azure/Fabric is lost; only the local folder. Paste (all steps reuse what exists):
 ```bash
@@ -92,3 +101,6 @@ Don't re-run `P3_metamodel.sql` after the first time: it resets the register.
 | `DRIFT_DETECTED` right after a successful apply | Fixed in NB_SEC_Sync (compares governed fields only) |
 | Graph 404 on a group just created | Fixed in NB_SEC_Sync (waits for Entra replication) |
 | `PolicyValidationError ... "Read"` | Fixed (columnAction is a list) |
+| No "New semantic model" button | You are in SQL database mode; switch the drop-down to SQL analytics endpoint |
+| `Invalid column name 'RequestNumber'` in the endpoint | Use `P6_endpoint_views.sql` (rebuilds the computed column) |
+| `KeyError: 'notebooks'` running `pipeline` | Run `python P0_2_fabric_deploy.py notebooks` first |
