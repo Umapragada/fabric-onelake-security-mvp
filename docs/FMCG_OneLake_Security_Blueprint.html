@@ -229,8 +229,8 @@ svg .card-m{font-size:11px;fill:var(--muted)}
   <p class="lede">Metadata-driven access control on Microsoft Fabric. Role, object, row and column security is defined once in a governed register, applied automatically to every engine that reads OneLake, limited in time, audited and notified.</p>
   <dl class="docmeta">
     <div><dt>Document ref</dt><dd>KDD-DP-SEC-001</dd></div>
-    <div><dt>Version</dt><dd>1.2 · Draft for review</dd></div>
-    <div><dt>Date</dt><dd>21 November 2026</dd></div>
+    <div><dt>Version</dt><dd>1.3 · Draft for review</dd></div>
+    <div><dt>Date</dt><dd>22 November 2026</dd></div>
     <div><dt>Classification</dt><dd>Internal</dd></div>
     <div><dt>Document owner</dt><dd>Data Security Lead</dd></div>
     <div><dt>Environment</dt><dd>Lab tenant Umapragada</dd></div>
@@ -244,7 +244,7 @@ svg .card-m{font-size:11px;fill:var(--muted)}
   <span class="eyebrow">Contents</span>
   <h2>Document index</h2>
   <p class="lede">Select any entry to open its chapter and jump to that point. The tab bar and the Previous and Next links at the end of each chapter also move through the document.</p>
-  <nav class="toc" aria-label="Document index"><div class="toc-ch"><a class="toc-h" href="#summary"><span>01</span>Overview</a><ol><li><a href="#summary"><span class="n">1.1</span>Executive summary</a><ol class="sub"><li><a href="#summary-purpose"><span class="n">1.1.1</span>Purpose</a></li><li><a href="#summary-scope"><span class="n">1.1.2</span>Scope</a></li><li><a href="#summary-out-of-scope"><span class="n">1.1.3</span>Out of scope</a></li><li><a href="#summary-key-design-decisions"><span class="n">1.1.4</span>Key design decisions</a></li><li><a href="#summary-open-decisions"><span class="n">1.1.5</span>Open decisions</a></li></ol></li><li><a href="#usecase"><span class="n">1.2</span>Business use case</a><ol class="sub"><li><a href="#usecase-business-context"><span class="n">1.2.1</span>Business context</a></li><li><a href="#usecase-what-each-domain-buys-and-pays-for"><span class="n">1.2.2</span>What each domain buys and pays for</a></li><li><a href="#usecase-the-problem"><span class="n">1.2.3</span>The problem</a></li><li><a href="#usecase-goal"><span class="n">1.2.4</span>Goal</a></li><li><a href="#usecase-value"><span class="n">1.2.5</span>Value</a></li><li><a href="#usecase-actors"><span class="n">1.2.6</span>Actors</a></li><li><a href="#usecase-business-rules"><span class="n">1.2.7</span>Business rules</a></li><li><a href="#usecase-acceptance-criteria"><span class="n">1.2.8</span>Acceptance criteria</a></li><li><a href="#usecase-out-of-scope"><span class="n">1.2.9</span>Out of scope</a></li><li><a href="#usecase-scenarios"><span class="n">1.2.10</span>Scenarios</a></li><li><a href="#usecase-use-case-diagram"><span class="n">1.2.11</span>Use case diagram</a></li></ol></li></ol></div><div class="toc-ch"><a class="toc-h" href="#arch"><span>02</span>Architecture</a><ol><li><a href="#arch"><span class="n">2.1</span>Solution architecture</a><ol class="sub"><li><a href="#arch-four-access-layers-one-source-of-truth"><span class="n">2.1.1</span>Four access layers, one source of truth</a></li><li><a href="#arch-why-the-workspace-stays-hidden"><span class="n">2.1.2</span>Why the workspace stays hidden</a></li><li><a href="#arch-why-groups-not-users-in-roles"><span class="n">2.1.3</span>Why groups, not users, in roles</a></li></ol></li><li><a href="#bronze"><span class="n">2.2</span>Medallion layers and source data</a><ol class="sub"><li><a href="#bronze-bronze-lh-bronze"><span class="n">2.2.1</span>Bronze · LH_*_Bronze</a></li><li><a href="#bronze-silver-lh-silver"><span class="n">2.2.2</span>Silver · LH_*_Silver</a></li><li><a href="#bronze-gold-lh-gold"><span class="n">2.2.3</span>Gold · LH_*_Gold</a></li></ol></li></ol></div><div class="toc-ch"><a class="toc-h" href="#model"><span>03</span>Data model</a><ol><li><a href="#model"><span class="n">3.1</span>Security metamodel · SQLDB_SecMeta, schema sec</a></li><li><a href="#erd"><span class="n">3.2</span>Entity relationships and data flow</a></li><li><a href="#compile"><span class="n">3.3</span>Compiling metadata into a OneLake role</a><ol class="sub"><li><a href="#compile-metadata-rows"><span class="n">3.3.1</span>Metadata rows</a></li><li><a href="#compile-compiled-role-one-entry-of-the-put-body"><span class="n">3.3.2</span>Compiled role (one entry of the PUT body)</a></li></ol></li></ol></div><div class="toc-ch"><a class="toc-h" href="#roles"><span>04</span>Security roles</a><ol><li><a href="#roles"><span class="n">4.1</span>Role catalogue</a><ol class="sub"><li><a href="#roles-naming-convention"><span class="n">4.1.1</span>Naming convention</a></li><li><a href="#roles-composition-rules"><span class="n">4.1.2</span>Composition rules</a></li><li><a href="#roles-who-is-never-restricted"><span class="n">4.1.3</span>Who is never restricted</a></li></ol></li><li><a href="#policies"><span class="n">4.2</span>Security policies</a><ol class="sub"><li><a href="#policies-segregation-of-duties-rules"><span class="n">4.2.1</span>Segregation of duties rules</a></li></ol></li><li><a href="#samples"><span class="n">4.3</span>Sample role definitions</a><ol class="sub"><li><a href="#samples-example-a-prcbuyerou102-row-filter-plus-"><span class="n">4.3.1</span>Example A · PrcBuyerOU102: row filter plus hidden column</a></li><li><a href="#samples-example-b-prcplannerou101-row-filter-and"><span class="n">4.3.2</span>Example B · PrcPlannerOU101: row filter and column filter on the same table</a></li><li><a href="#samples-example-c-aptreasuryall-table-level-acce"><span class="n">4.3.3</span>Example C · ApTreasuryAll: table-level access, no row filter</a></li></ol></li><li><a href="#matrixroles"><span class="n">4.4</span>Access matrix</a></li><li><a href="#rbac"><span class="n">4.5</span>Workspace roles (RBAC)</a></li></ol></div><div class="toc-ch"><a class="toc-h" href="#form"><span>05</span>Operations</a><ol><li><a href="#form"><span class="n">5.1</span>Access request form</a><ol class="sub"><li><a href="#form-data-access-request"><span class="n">5.1.1</span>Data access request</a></li><li><a href="#form-result"><span class="n">5.1.2</span>Result</a></li><li><a href="#form-checks-the-portal-runs"><span class="n">5.1.3</span>Checks the portal runs</a></li></ol></li><li><a href="#sync"><span class="n">5.2</span>Synchronisation engine</a></li><li><a href="#life"><span class="n">5.3</span>Access lifecycle and notifications</a></li></ol></div><div class="toc-ch"><a class="toc-h" href="#matrix"><span>06</span>Assurance</a><ol><li><a href="#matrix"><span class="n">6.1</span>Enforcement and test matrix</a></li><li><a href="#personas"><span class="n">6.2</span>Test personas</a></li><li><a href="#e2e"><span class="n">6.3</span>End-to-end test walkthrough</a><ol class="sub"><li><a href="#e2e-part-a-what-each-person-sees-read-tests"><span class="n">6.3.1</span>Part A · What each person sees (read tests)</a></li><li><a href="#e2e-part-b-the-lifecycle-change-tests"><span class="n">6.3.2</span>Part B · The lifecycle (change tests)</a></li><li><a href="#e2e-part-c-other-engines-and-ai-needs-paid-f"><span class="n">6.3.3</span>Part C · Other engines and AI (needs paid F2 or higher, so do this in KDD)</a></li></ol></li></ol></div><div class="toc-ch"><a class="toc-h" href="#plan"><span>07</span>Delivery</a><ol><li><a href="#plan"><span class="n">7.1</span>Delivery plan</a><ol class="sub"><li><a href="#plan-foundations"><span class="n">7.1.1</span>Foundations</a></li><li><a href="#plan-bronze-data"><span class="n">7.1.2</span>Bronze data</a></li><li><a href="#plan-silver-and-gold"><span class="n">7.1.3</span>Silver and Gold</a></li><li><a href="#plan-security-metamodel"><span class="n">7.1.4</span>Security metamodel</a></li><li><a href="#plan-sync-engine"><span class="n">7.1.5</span>Sync engine</a></li><li><a href="#plan-lifecycle-and-mail"><span class="n">7.1.6</span>Lifecycle and mail</a></li><li><a href="#plan-audit-and-admin-report"><span class="n">7.1.7</span>Audit and admin report</a></li><li><a href="#plan-run-the-test-matrix"><span class="n">7.1.8</span>Run the test matrix</a></li></ol></li></ol></div><div class="toc-ch"><a class="toc-h" href="#reqs"><span>08</span>Requirements</a><ol><li><a href="#reqs"><span class="n">8.1</span>Requirements register</a></li></ol></div><div class="toc-ch"><a class="toc-h" href="#impl"><span>09</span>Implementation</a><ol><li><a href="#impl"><span class="n">9.1</span>Implementation plan and timeline</a><ol class="sub"><li><a href="#impl-milestones"><span class="n">9.1.1</span>Milestones</a></li><li><a href="#impl-phases-owners-and-exit-criteria"><span class="n">9.1.2</span>Phases, owners and exit criteria</a></li><li><a href="#impl-team-and-governance"><span class="n">9.1.3</span>Team and governance</a></li><li><a href="#impl-risks-to-the-timeline"><span class="n">9.1.4</span>Risks to the timeline</a></li></ol></li></ol></div><div class="toc-ch"><a class="toc-h" href="#build"><span>10</span>Build status</a><ol><li><a href="#flow"><span class="n">10.1</span>End-to-end flow</a><ol class="sub"><li><a href="#flow-what-one-request-does"><span class="n">10.1.1</span>What one request does</a></li><li><a href="#flow-what-stops-bad-grants"><span class="n">10.1.2</span>What stops bad grants</a></li><li><a href="#flow-what-makes-it-safe-to-rerun"><span class="n">10.1.3</span>What makes it safe to rerun</a></li></ol></li><li><a href="#status"><span class="n">10.2</span>Scope status: done and left</a></li></ol></div><div class="toc-ch"><a class="toc-h" href="#extend"><span>11</span>Extend</a><ol><li><a href="#reuse"><span class="n">11.1</span>New domains and cross-domain products</a><ol class="sub"><li><a href="#reuse-onboard-a-new-domain-for-example-sales"><span class="n">11.1.1</span>Onboard a new domain, for example Sales</a></li><li><a href="#reuse-cross-domain-data-products"><span class="n">11.1.2</span>Cross-domain data products</a></li></ol></li><li><a href="#ai"><span class="n">11.2</span>AI agents, semantic models and ontologies</a><ol class="sub"><li><a href="#ai-how-it-maps-to-your-layout"><span class="n">11.2.1</span>How it maps to your layout</a></li></ol></li></ol></div></nav>
+  <nav class="toc" aria-label="Document index"><div class="toc-ch"><a class="toc-h" href="#summary"><span>01</span>Overview</a><ol><li><a href="#summary"><span class="n">1.1</span>Executive summary</a><ol class="sub"><li><a href="#summary-purpose"><span class="n">1.1.1</span>Purpose</a></li><li><a href="#summary-scope"><span class="n">1.1.2</span>Scope</a></li><li><a href="#summary-out-of-scope"><span class="n">1.1.3</span>Out of scope</a></li><li><a href="#summary-key-design-decisions"><span class="n">1.1.4</span>Key design decisions</a></li><li><a href="#summary-open-decisions"><span class="n">1.1.5</span>Open decisions</a></li></ol></li><li><a href="#usecase"><span class="n">1.2</span>Business use case</a><ol class="sub"><li><a href="#usecase-business-context"><span class="n">1.2.1</span>Business context</a></li><li><a href="#usecase-what-each-domain-buys-and-pays-for"><span class="n">1.2.2</span>What each domain buys and pays for</a></li><li><a href="#usecase-the-problem"><span class="n">1.2.3</span>The problem</a></li><li><a href="#usecase-goal"><span class="n">1.2.4</span>Goal</a></li><li><a href="#usecase-value"><span class="n">1.2.5</span>Value</a></li><li><a href="#usecase-actors"><span class="n">1.2.6</span>Actors</a></li><li><a href="#usecase-business-rules"><span class="n">1.2.7</span>Business rules</a></li><li><a href="#usecase-acceptance-criteria"><span class="n">1.2.8</span>Acceptance criteria</a></li><li><a href="#usecase-out-of-scope"><span class="n">1.2.9</span>Out of scope</a></li><li><a href="#usecase-scenarios"><span class="n">1.2.10</span>Scenarios</a></li><li><a href="#usecase-use-case-diagram"><span class="n">1.2.11</span>Use case diagram</a></li></ol></li></ol></div><div class="toc-ch"><a class="toc-h" href="#arch"><span>02</span>Architecture</a><ol><li><a href="#arch"><span class="n">2.1</span>Solution architecture</a><ol class="sub"><li><a href="#arch-four-access-layers-one-source-of-truth"><span class="n">2.1.1</span>Four access layers, one source of truth</a></li><li><a href="#arch-why-the-workspace-stays-hidden"><span class="n">2.1.2</span>Why the workspace stays hidden</a></li><li><a href="#arch-why-groups-not-users-in-roles"><span class="n">2.1.3</span>Why groups, not users, in roles</a></li></ol></li><li><a href="#bronze"><span class="n">2.2</span>Medallion layers and source data</a><ol class="sub"><li><a href="#bronze-bronze-lh-bronze"><span class="n">2.2.1</span>Bronze · LH_*_Bronze</a></li><li><a href="#bronze-silver-lh-silver"><span class="n">2.2.2</span>Silver · LH_*_Silver</a></li><li><a href="#bronze-gold-lh-gold"><span class="n">2.2.3</span>Gold · LH_*_Gold</a></li></ol></li></ol></div><div class="toc-ch"><a class="toc-h" href="#model"><span>03</span>Data model</a><ol><li><a href="#model"><span class="n">3.1</span>Security metamodel · SQLDB_SecMeta, schema sec</a></li><li><a href="#erd"><span class="n">3.2</span>Entity relationships and data flow</a></li><li><a href="#compile"><span class="n">3.3</span>Compiling metadata into a OneLake role</a><ol class="sub"><li><a href="#compile-metadata-rows"><span class="n">3.3.1</span>Metadata rows</a></li><li><a href="#compile-compiled-role-one-entry-of-the-put-body"><span class="n">3.3.2</span>Compiled role (one entry of the PUT body)</a></li></ol></li><li><a href="#dictionary"><span class="n">3.4</span>Security metadata dictionary</a><ol class="sub"><li><a href="#dictionary-who-prepares-the-rules"><span class="n">3.4.1</span>Who prepares the rules</a></li><li><a href="#dictionary-what-assets"><span class="n">3.4.2</span>What: assets</a></li><li><a href="#dictionary-how-rules"><span class="n">3.4.3</span>How: rules</a></li><li><a href="#dictionary-who-people-and-requests"><span class="n">3.4.4</span>Who: people and requests</a></li><li><a href="#dictionary-generated-by-the-sync"><span class="n">3.4.5</span>Generated by the sync</a></li><li><a href="#dictionary-evidence"><span class="n">3.4.6</span>Evidence</a></li></ol></li></ol></div><div class="toc-ch"><a class="toc-h" href="#roles"><span>04</span>Security roles</a><ol><li><a href="#roles"><span class="n">4.1</span>Role catalogue</a><ol class="sub"><li><a href="#roles-naming-convention"><span class="n">4.1.1</span>Naming convention</a></li><li><a href="#roles-composition-rules"><span class="n">4.1.2</span>Composition rules</a></li><li><a href="#roles-who-is-never-restricted"><span class="n">4.1.3</span>Who is never restricted</a></li></ol></li><li><a href="#policies"><span class="n">4.2</span>Security policies</a><ol class="sub"><li><a href="#policies-segregation-of-duties-rules"><span class="n">4.2.1</span>Segregation of duties rules</a></li></ol></li><li><a href="#samples"><span class="n">4.3</span>Sample role definitions</a><ol class="sub"><li><a href="#samples-example-a-prcbuyerou102-row-filter-plus-"><span class="n">4.3.1</span>Example A · PrcBuyerOU102: row filter plus hidden column</a></li><li><a href="#samples-example-b-prcplannerou101-row-filter-and"><span class="n">4.3.2</span>Example B · PrcPlannerOU101: row filter and column filter on the same table</a></li><li><a href="#samples-example-c-aptreasuryall-table-level-acce"><span class="n">4.3.3</span>Example C · ApTreasuryAll: table-level access, no row filter</a></li></ol></li><li><a href="#matrixroles"><span class="n">4.4</span>Access matrix</a></li><li><a href="#rbac"><span class="n">4.5</span>Workspace roles (RBAC)</a></li></ol></div><div class="toc-ch"><a class="toc-h" href="#form"><span>05</span>Operations</a><ol><li><a href="#form"><span class="n">5.1</span>Access request form</a><ol class="sub"><li><a href="#form-data-access-request"><span class="n">5.1.1</span>Data access request</a></li><li><a href="#form-result"><span class="n">5.1.2</span>Result</a></li><li><a href="#form-checks-the-portal-runs"><span class="n">5.1.3</span>Checks the portal runs</a></li></ol></li><li><a href="#sync"><span class="n">5.2</span>Synchronisation engine</a></li><li><a href="#life"><span class="n">5.3</span>Access lifecycle and notifications</a></li></ol></div><div class="toc-ch"><a class="toc-h" href="#matrix"><span>06</span>Assurance</a><ol><li><a href="#matrix"><span class="n">6.1</span>Enforcement and test matrix</a></li><li><a href="#personas"><span class="n">6.2</span>Test personas</a></li><li><a href="#e2e"><span class="n">6.3</span>End-to-end test walkthrough</a><ol class="sub"><li><a href="#e2e-part-a-what-each-person-sees-read-tests"><span class="n">6.3.1</span>Part A · What each person sees (read tests)</a></li><li><a href="#e2e-part-b-the-lifecycle-change-tests"><span class="n">6.3.2</span>Part B · The lifecycle (change tests)</a></li><li><a href="#e2e-part-c-other-engines-and-ai-needs-paid-f"><span class="n">6.3.3</span>Part C · Other engines and AI (needs paid F2 or higher, so do this in KDD)</a></li></ol></li></ol></div><div class="toc-ch"><a class="toc-h" href="#plan"><span>07</span>Delivery</a><ol><li><a href="#plan"><span class="n">7.1</span>Delivery plan</a><ol class="sub"><li><a href="#plan-foundations"><span class="n">7.1.1</span>Foundations</a></li><li><a href="#plan-bronze-data"><span class="n">7.1.2</span>Bronze data</a></li><li><a href="#plan-silver-and-gold"><span class="n">7.1.3</span>Silver and Gold</a></li><li><a href="#plan-security-metamodel"><span class="n">7.1.4</span>Security metamodel</a></li><li><a href="#plan-sync-engine"><span class="n">7.1.5</span>Sync engine</a></li><li><a href="#plan-lifecycle-and-mail"><span class="n">7.1.6</span>Lifecycle and mail</a></li><li><a href="#plan-audit-and-admin-report"><span class="n">7.1.7</span>Audit and admin report</a></li><li><a href="#plan-run-the-test-matrix"><span class="n">7.1.8</span>Run the test matrix</a></li></ol></li></ol></div><div class="toc-ch"><a class="toc-h" href="#reqs"><span>08</span>Requirements</a><ol><li><a href="#reqs"><span class="n">8.1</span>Requirements register</a></li></ol></div><div class="toc-ch"><a class="toc-h" href="#impl"><span>09</span>Implementation</a><ol><li><a href="#impl"><span class="n">9.1</span>Implementation plan and timeline</a><ol class="sub"><li><a href="#impl-milestones"><span class="n">9.1.1</span>Milestones</a></li><li><a href="#impl-phases-owners-and-exit-criteria"><span class="n">9.1.2</span>Phases, owners and exit criteria</a></li><li><a href="#impl-team-and-governance"><span class="n">9.1.3</span>Team and governance</a></li><li><a href="#impl-risks-to-the-timeline"><span class="n">9.1.4</span>Risks to the timeline</a></li></ol></li></ol></div><div class="toc-ch"><a class="toc-h" href="#build"><span>10</span>Build status</a><ol><li><a href="#flow"><span class="n">10.1</span>End-to-end flow</a><ol class="sub"><li><a href="#flow-what-one-request-does"><span class="n">10.1.1</span>What one request does</a></li><li><a href="#flow-what-stops-bad-grants"><span class="n">10.1.2</span>What stops bad grants</a></li><li><a href="#flow-what-makes-it-safe-to-rerun"><span class="n">10.1.3</span>What makes it safe to rerun</a></li></ol></li><li><a href="#status"><span class="n">10.2</span>Scope status: done and left</a></li></ol></div><div class="toc-ch"><a class="toc-h" href="#extend"><span>11</span>Extend</a><ol><li><a href="#reuse"><span class="n">11.1</span>New domains and cross-domain products</a><ol class="sub"><li><a href="#reuse-onboard-a-new-domain-for-example-sales"><span class="n">11.1.1</span>Onboard a new domain, for example Sales</a></li><li><a href="#reuse-cross-domain-data-products"><span class="n">11.1.2</span>Cross-domain data products</a></li></ol></li><li><a href="#ai"><span class="n">11.2</span>AI agents, semantic models and ontologies</a><ol class="sub"><li><a href="#ai-how-it-maps-to-your-layout"><span class="n">11.2.1</span>How it maps to your layout</a></li></ol></li><li><a href="#vision"><span class="n">11.3</span>Product vision</a></li></ol></div></nav>
 </section>
 <section id="summary" data-tab="overview">
   <span class="eyebrow">1.1 · Executive summary</span>
@@ -860,6 +860,175 @@ datasteward@… PrcBuyer  ScopeValue=<span class="s">102</span>  2026-11-18 → 
     </div>
   </div>
   <div class="note"><b>Three rules the compiler must obey.</b> (1) The PUT replaces the item's whole role set, so the engine always sends every role for that lakehouse; anything missing, including <code>DefaultReader</code>, is deleted. (2) RLS predicates are static, so one role per scope value: <code>PrcBuyerOU101</code>, <code>PrcBuyerOU102</code>, <code>PrcBuyerOU103</code>. (3) Keep a table's RLS and CLS in the same role, and avoid putting one person in two roles that secure the same table differently.</div>
+</section>
+
+<style>details.dict{background:var(--panel);border:1px solid var(--line);border-radius:4px;padding:10px 14px}details.dict summary{cursor:pointer;line-height:1.5}details.dict .muted{color:var(--muted);font-size:13px;display:block}details.dict[open] summary{margin-bottom:10px}</style>
+<section id="dictionary" data-tab="data-model">
+  <span class="eyebrow">3.4 · Security metadata dictionary</span>
+  <h2>Every table and column, with who maintains it</h2>
+  <p class="lede">The register is the product: if a rule is not in these tables, no engine applies it. Examples are real rows from the lab, following datasteward (Procurement buyer, OU 102).</p>
+  <h3 id="dictionary-who-prepares-the-rules">Who prepares the rules</h3>
+  <div class="tablewrap"><table><thead><tr><th>Activity</th><th>Does the work</th><th>Accountable</th><th>Consulted</th><th>Informed</th></tr></thead><tbody>
+    <tr><td>Define domains, owners and scope values</td><td><b>Data Owner</b></td><td>Data Owner</td><td>Security Admin, Data Steward</td><td>Internal Audit</td></tr>
+    <tr><td>Draft role templates, table, row and column rules</td><td><b>Data Steward</b></td><td>Data Owner</td><td>Domain SME, Security Admin</td><td>Internal Audit</td></tr>
+    <tr><td>Confirm column sensitivity (PII, bank, VAT)</td><td><b>Domain SME</b></td><td>Data Owner</td><td>Data Steward</td><td>Security Admin</td></tr>
+    <tr><td>Define conflicts (segregation of duties)</td><td><b>Data Owner</b></td><td>Data Owner</td><td>Internal Audit</td><td>Security Admin</td></tr>
+    <tr><td>Load rules into the register, dry run, publish</td><td><b>Security Admin</b></td><td>Security Admin</td><td>Data Steward</td><td>Data Owner</td></tr>
+    <tr><td>Request access</td><td><b>Requester or manager</b></td><td>Requester&#x27;s manager</td><td>—</td><td>Data Owner</td></tr>
+    <tr><td>Approve or reject requests</td><td><b>Data Owner</b></td><td>Data Owner</td><td>—</td><td>Security Admin</td></tr>
+    <tr><td>Run sync, lifecycle and mail</td><td><b>System</b></td><td>Security Admin</td><td>—</td><td>Data Owner</td></tr>
+    <tr><td>Review access and evidence each quarter</td><td><b>Internal Audit</b></td><td>Data Owner</td><td>Security Admin</td><td>Data Steward</td></tr>
+  </tbody></table></div>
+  <div class="note">The Data Steward writes the rules, the domain SME says which columns are sensitive, the Data Owner approves, the Security Admin loads them with a dry run, and Internal Audit reviews the evidence.</div>
+  <h3 id="dictionary-what-assets">What: assets</h3>
+  <details class="dict"><summary><code>sec.Domain</code> · A business data domain with one accountable owner. <span class="muted">Maintained by: Data Owner (via Security Admin)</span></summary>
+  <div class="tablewrap"><table><thead><tr><th>Column</th><th>Definition</th><th>Example</th></tr></thead><tbody>
+    <tr><td><code>DomainId</code></td><td>Key of the domain.</td><td><code>1</code></td></tr>
+    <tr><td><code>DomainName</code></td><td>Business name, unique.</td><td><code>Procurement</code></td></tr>
+    <tr><td><code>FabricDomainId</code></td><td>Id of the matching Fabric domain, if used.</td><td><code>NULL</code></td></tr>
+    <tr><td><code>OwnerUPN</code></td><td>Data Owner; approves requests for this domain&#x27;s roles.</td><td><code>omar.alrashidi@…</code></td></tr>
+    <tr><td><code>Description</code></td><td>What data the domain covers.</td><td><code>Purchasing, receipts, items and categories</code></td></tr>
+  </tbody></table></div></details>
+  <details class="dict"><summary><code>sec.Workspace</code> · A Fabric workspace that belongs to a domain and a layer. <span class="muted">Maintained by: Security Admin</span></summary>
+  <div class="tablewrap"><table><thead><tr><th>Column</th><th>Definition</th><th>Example</th></tr></thead><tbody>
+    <tr><td><code>WorkspaceKey</code></td><td>Key of the workspace.</td><td><code>3</code></td></tr>
+    <tr><td><code>DomainId</code></td><td>Owning domain (NULL for the control workspace).</td><td><code>1</code></td></tr>
+    <tr><td><code>WorkspaceName</code></td><td>Exact Fabric display name; the sync finds the workspace by it.</td><td><code>WS-PRC-Gold</code></td></tr>
+    <tr><td><code>FabricWorkspaceId</code></td><td>Fabric GUID, optional.</td><td><code>NULL</code></td></tr>
+    <tr><td><code>Layer</code></td><td>Bronze, Silver, Gold or Control.</td><td><code>Gold</code></td></tr>
+    <tr><td><code>IsHidden</code></td><td>1 = only the security team should see it.</td><td><code>0</code></td></tr>
+  </tbody></table></div></details>
+  <details class="dict"><summary><code>sec.Item</code> · A Fabric item (lakehouse, model, agent, report) inside a workspace. <span class="muted">Maintained by: Security Admin</span></summary>
+  <div class="tablewrap"><table><thead><tr><th>Column</th><th>Definition</th><th>Example</th></tr></thead><tbody>
+    <tr><td><code>ItemKey</code></td><td>Key of the item; rules point at it.</td><td><code>3</code></td></tr>
+    <tr><td><code>WorkspaceKey</code></td><td>Workspace that holds the item.</td><td><code>3</code></td></tr>
+    <tr><td><code>ItemName</code></td><td>Exact Fabric item name.</td><td><code>LH_PRC_Gold</code></td></tr>
+    <tr><td><code>ItemType</code></td><td>Lakehouse, SemanticModel, DataAgent, Report, …</td><td><code>Lakehouse</code></td></tr>
+    <tr><td><code>FabricItemId</code></td><td>Fabric GUID, optional.</td><td><code>NULL</code></td></tr>
+    <tr><td><code>OneLakeSecured</code></td><td>1 = the sync writes the full OneLake role set to this item every run.</td><td><code>1</code></td></tr>
+  </tbody></table></div></details>
+  <details class="dict"><summary><code>sec.ScopeValue</code> · The allowed values for row-level scope. <span class="muted">Maintained by: Data Owner</span></summary>
+  <div class="tablewrap"><table><thead><tr><th>Column</th><th>Definition</th><th>Example</th></tr></thead><tbody>
+    <tr><td><code>ScopeType</code></td><td>Kind of scope: ORG_ID or ALL.</td><td><code>ORG_ID</code></td></tr>
+    <tr><td><code>ScopeValue</code></td><td>The value a row filter uses.</td><td><code>102</code></td></tr>
+    <tr><td><code>Label</code></td><td>Business label shown to requesters.</td><td><code>KDD Saudi Arabia</code></td></tr>
+    <tr><td><code>CurrencyCode</code></td><td>Currency of that unit, for reports.</td><td><code>SAR</code></td></tr>
+  </tbody></table></div></details>
+  <h3 id="dictionary-how-rules">How: rules</h3>
+  <details class="dict"><summary><code>sec.RoleTemplate</code> · A business role written once per domain; requests pick one. <span class="muted">Maintained by: Data Steward drafts, Data Owner approves</span></summary>
+  <div class="tablewrap"><table><thead><tr><th>Column</th><th>Definition</th><th>Example</th></tr></thead><tbody>
+    <tr><td><code>RoleTemplateId</code></td><td>Key of the role.</td><td><code>1</code></td></tr>
+    <tr><td><code>RoleCode</code></td><td>Short code; becomes part of the Fabric role and group name.</td><td><code>PrcBuyer</code></td></tr>
+    <tr><td><code>DisplayName</code></td><td>Name shown on the request form.</td><td><code>Procurement buyer</code></td></tr>
+    <tr><td><code>DomainId</code></td><td>Domain the role belongs to.</td><td><code>1</code></td></tr>
+    <tr><td><code>ScopeType</code></td><td>ORG_ID = one unit per request; ALL = no row filter.</td><td><code>ORG_ID</code></td></tr>
+    <tr><td><code>Layers</code></td><td>Layers the role reaches.</td><td><code>Gold</code></td></tr>
+    <tr><td><code>WorkspaceRole</code></td><td>Workspace role given to the group; always Viewer for consumers.</td><td><code>Viewer</code></td></tr>
+    <tr><td><code>MaxDays</code></td><td>Longest access a single request may ask for.</td><td><code>180</code></td></tr>
+    <tr><td><code>RequiresDepartment</code></td><td>Only people in this department may hold it; NULL = anyone.</td><td><code>Internal Audit</code></td></tr>
+    <tr><td><code>IsActive</code></td><td>0 = no new requests.</td><td><code>1</code></td></tr>
+    <tr><td><code>Description</code></td><td>Plain-language summary of what the role sees.</td><td><code>POs, receipts and supplier names for one operating unit</code></td></tr>
+  </tbody></table></div></details>
+  <details class="dict"><summary><code>sec.ObjectRule</code> · Which tables a role may read in an item. A table not listed is invisible. <span class="muted">Maintained by: Data Steward with SME</span></summary>
+  <div class="tablewrap"><table><thead><tr><th>Column</th><th>Definition</th><th>Example</th></tr></thead><tbody>
+    <tr><td><code>RoleTemplateId</code></td><td>The role.</td><td><code>1</code></td></tr>
+    <tr><td><code>ItemKey</code></td><td>The item (lakehouse).</td><td><code>3 (LH_PRC_Gold)</code></td></tr>
+    <tr><td><code>TablePath</code></td><td>OneLake path of the table.</td><td><code>/Tables/gold/fact_purchase_order</code></td></tr>
+  </tbody></table></div></details>
+  <details class="dict"><summary><code>sec.RowRule</code> · Row filter for a table: the column compared with the request&#x27;s scope value. No row = all rows. <span class="muted">Maintained by: Data Steward with SME</span></summary>
+  <div class="tablewrap"><table><thead><tr><th>Column</th><th>Definition</th><th>Example</th></tr></thead><tbody>
+    <tr><td><code>RoleTemplateId</code></td><td>The role.</td><td><code>1</code></td></tr>
+    <tr><td><code>ItemKey</code></td><td>The item.</td><td><code>3</code></td></tr>
+    <tr><td><code>TablePath</code></td><td>The table.</td><td><code>/Tables/gold/fact_purchase_order</code></td></tr>
+    <tr><td><code>FilterColumn</code></td><td>Column filtered by the scope; becomes org_id = &#x27;102&#x27; for an OU 102 request.</td><td><code>org_id</code></td></tr>
+  </tbody></table></div></details>
+  <details class="dict"><summary><code>sec.ColumnRule</code> · Allowed columns for a table. Anything not listed is hidden. No row = all columns. <span class="muted">Maintained by: Data Steward with SME; Data Owner approves sensitive columns</span></summary>
+  <div class="tablewrap"><table><thead><tr><th>Column</th><th>Definition</th><th>Example</th></tr></thead><tbody>
+    <tr><td><code>RoleTemplateId</code></td><td>The role.</td><td><code>1</code></td></tr>
+    <tr><td><code>ItemKey</code></td><td>The item.</td><td><code>3</code></td></tr>
+    <tr><td><code>TablePath</code></td><td>The table.</td><td><code>/Tables/gold/dim_supplier</code></td></tr>
+    <tr><td><code>AllowedColumns</code></td><td>JSON list of visible columns, case-sensitive.</td><td><code>[&quot;supplier_id&quot;,&quot;supplier_name&quot;,&quot;country&quot;,…]</code></td></tr>
+  </tbody></table></div></details>
+  <details class="dict"><summary><code>sec.RoleConflict</code> · Pairs of roles one person may not hold together (segregation of duties). <span class="muted">Maintained by: Data Owner with Internal Audit</span></summary>
+  <div class="tablewrap"><table><thead><tr><th>Column</th><th>Definition</th><th>Example</th></tr></thead><tbody>
+    <tr><td><code>ConflictId</code></td><td>Key.</td><td><code>1</code></td></tr>
+    <tr><td><code>RoleCodeA</code></td><td>First role.</td><td><code>PrcBuyer</code></td></tr>
+    <tr><td><code>RoleCodeB</code></td><td>Second role.</td><td><code>ApClerk</code></td></tr>
+    <tr><td><code>ConflictScope</code></td><td>Any = never together; SameScope = not on the same unit.</td><td><code>SameScope</code></td></tr>
+    <tr><td><code>Reason</code></td><td>Why, in business words.</td><td><code>A buyer may not process invoices for POs in the same operating unit</code></td></tr>
+  </tbody></table></div></details>
+  <h3 id="dictionary-who-people-and-requests">Who: people and requests</h3>
+  <details class="dict"><summary><code>sec.UserProfile</code> · People who can hold access, with HR status. <span class="muted">Maintained by: HR feed (MVP: Security Admin)</span></summary>
+  <div class="tablewrap"><table><thead><tr><th>Column</th><th>Definition</th><th>Example</th></tr></thead><tbody>
+    <tr><td><code>UserId</code></td><td>Key.</td><td><code>2</code></td></tr>
+    <tr><td><code>UPN</code></td><td>Sign-in name; must exist in Entra.</td><td><code>datasteward@…</code></td></tr>
+    <tr><td><code>EntraObjectId</code></td><td>Filled by the sync.</td><td><code>8c1e…</code></td></tr>
+    <tr><td><code>DisplayName</code></td><td>Name.</td><td><code>Data Steward</code></td></tr>
+    <tr><td><code>JobTitle</code></td><td>Title.</td><td><code>Buyer, Dairy Raw Materials</code></td></tr>
+    <tr><td><code>Department</code></td><td>Checked against RequiresDepartment.</td><td><code>Procurement</code></td></tr>
+    <tr><td><code>CostCentre</code></td><td>For reporting.</td><td><code>CC-PRC-220</code></td></tr>
+    <tr><td><code>Country</code></td><td>For reporting.</td><td><code>Saudi Arabia</code></td></tr>
+    <tr><td><code>HomeOrgId</code></td><td>Home operating unit.</td><td><code>102</code></td></tr>
+    <tr><td><code>ManagerUPN</code></td><td>Copied on mails.</td><td><code>omar.alrashidi@…</code></td></tr>
+    <tr><td><code>EmploymentStatus</code></td><td>Active or Leaver; a Leaver loses everything on the next run.</td><td><code>Active</code></td></tr>
+    <tr><td><code>LeaverDate</code></td><td>Date of leaving.</td><td><code>NULL</code></td></tr>
+    <tr><td><code>ExistsInTenant</code></td><td>1 once found in Entra.</td><td><code>1</code></td></tr>
+  </tbody></table></div></details>
+  <details class="dict"><summary><code>sec.AccessRequest</code> · One request for one person, one role, one scope, with dates. The only way access is granted. <span class="muted">Maintained by: Requester fills; Data Owner approves; lifecycle moves the status</span></summary>
+  <div class="tablewrap"><table><thead><tr><th>Column</th><th>Definition</th><th>Example</th></tr></thead><tbody>
+    <tr><td><code>RequestId / RequestNumber</code></td><td>Key and readable number.</td><td><code>1 / ACC-00001</code></td></tr>
+    <tr><td><code>TicketRef</code></td><td>ServiceNow or other ticket.</td><td><code>RITM0010481</code></td></tr>
+    <tr><td><code>RequestType</code></td><td>New, Extend or Remove.</td><td><code>New</code></td></tr>
+    <tr><td><code>UserId</code></td><td>Who gets access.</td><td><code>2</code></td></tr>
+    <tr><td><code>RoleTemplateId</code></td><td>Which role.</td><td><code>1</code></td></tr>
+    <tr><td><code>ScopeValue</code></td><td>Which unit, or ALL.</td><td><code>102</code></td></tr>
+    <tr><td><code>StartDate / EndDate</code></td><td>Access window; EndDate − StartDate ≤ MaxDays.</td><td><code>2026-11-18 / 2027-02-15</code></td></tr>
+    <tr><td><code>ReasonCategory / Justification</code></td><td>Why.</td><td><code>New joiner / Joined KSA buying team…</code></td></tr>
+    <tr><td><code>RequestedByUPN</code></td><td>Who asked.</td><td><code>omar.alrashidi@…</code></td></tr>
+    <tr><td><code>ApproverUPN / ApprovedAt</code></td><td>Who approved and when.</td><td><code>omar.alrashidi@… / 2026-11-16 14:40</code></td></tr>
+    <tr><td><code>Status</code></td><td>Pending → Approved → Active → Expired or Revoked; or Rejected.</td><td><code>Active</code></td></tr>
+    <tr><td><code>StatusReason</code></td><td>Why the status changed.</td><td><code>RoleConflict: …</code></td></tr>
+  </tbody></table></div></details>
+  <h3 id="dictionary-generated-by-the-sync">Generated by the sync</h3>
+  <details class="dict"><summary><code>sec.RoleBinding</code> · What the sync built: one Fabric role per role + scope + item. Never edited by hand. <span class="muted">Maintained by: System (NB_SEC_Sync)</span></summary>
+  <div class="tablewrap"><table><thead><tr><th>Column</th><th>Definition</th><th>Example</th></tr></thead><tbody>
+    <tr><td><code>RoleName</code></td><td>Fabric role name.</td><td><code>PrcBuyerOU102</code></td></tr>
+    <tr><td><code>ItemKey</code></td><td>Item it lives on.</td><td><code>3</code></td></tr>
+    <tr><td><code>RoleTemplateId / ScopeValue</code></td><td>Source of the role.</td><td><code>1 / 102</code></td></tr>
+    <tr><td><code>EntraGroupName / EntraGroupId</code></td><td>Group that is the role&#x27;s member.</td><td><code>grp-ol-PrcBuyerOU102</code></td></tr>
+    <tr><td><code>MemberCount</code></td><td>People in the group.</td><td><code>1</code></td></tr>
+    <tr><td><code>RoleJson / RoleHash</code></td><td>Exact role sent to Fabric, and its hash for change detection.</td><td><code>{…}</code></td></tr>
+    <tr><td><code>Status / AppliedAt</code></td><td>Planned, Applied or Removed, and when.</td><td><code>Applied</code></td></tr>
+  </tbody></table></div></details>
+  <h3 id="dictionary-evidence">Evidence</h3>
+  <details class="dict"><summary><code>sec.SyncRun</code> · One row per sync run. <span class="muted">Maintained by: System</span></summary>
+  <div class="tablewrap"><table><thead><tr><th>Column</th><th>Definition</th><th>Example</th></tr></thead><tbody>
+    <tr><td><code>RunId</code></td><td>Key.</td><td><code>42</code></td></tr>
+    <tr><td><code>StartedAt / EndedAt</code></td><td>Run time.</td><td><code>06:00 / 06:04</code></td></tr>
+    <tr><td><code>TriggerType</code></td><td>Schedule or Manual.</td><td><code>Schedule</code></td></tr>
+    <tr><td><code>DryRun</code></td><td>1 = validated only.</td><td><code>0</code></td></tr>
+    <tr><td><code>RolesChanged / MembersAdded / MembersRemoved / Errors</code></td><td>What the run changed.</td><td><code>1 / 2 / 0 / 0</code></td></tr>
+  </tbody></table></div></details>
+  <details class="dict"><summary><code>sec.AuditLog</code> · Every change with before and after, for audit. <span class="muted">Maintained by: System</span></summary>
+  <div class="tablewrap"><table><thead><tr><th>Column</th><th>Definition</th><th>Example</th></tr></thead><tbody>
+    <tr><td><code>AuditId</code></td><td>Key.</td><td><code>118</code></td></tr>
+    <tr><td><code>EventTime</code></td><td>When.</td><td><code>2026-11-22 03:00</code></td></tr>
+    <tr><td><code>RunId / RequestId</code></td><td>Links to the run and the request.</td><td><code>42 / 6</code></td></tr>
+    <tr><td><code>Action</code></td><td>What happened.</td><td><code>REQUEST_EXPIRED</code></td></tr>
+    <tr><td><code>Target</code></td><td>What it happened to.</td><td><code>sam.patel@… ACC-00006</code></td></tr>
+    <tr><td><code>BeforeJson / AfterJson</code></td><td>State before and after.</td><td><code>{&quot;status&quot;:&quot;Active&quot;} / {&quot;status&quot;:&quot;Expired&quot;}</code></td></tr>
+    <tr><td><code>Actor / Outcome</code></td><td>Who did it and the result.</td><td><code>spn-fabric-secops / Success</code></td></tr>
+  </tbody></table></div></details>
+  <details class="dict"><summary><code>sec.NotificationLog</code> · Mails to users and approvers. <span class="muted">Maintained by: System</span></summary>
+  <div class="tablewrap"><table><thead><tr><th>Column</th><th>Definition</th><th>Example</th></tr></thead><tbody>
+    <tr><td><code>NotificationId</code></td><td>Key.</td><td><code>31</code></td></tr>
+    <tr><td><code>RequestId</code></td><td>Request it is about.</td><td><code>6</code></td></tr>
+    <tr><td><code>NotificationType</code></td><td>ENABLED, EXPIRY_T7, EXPIRY_T1, REVOKED, …</td><td><code>EXPIRY_T1</code></td></tr>
+    <tr><td><code>SentTo / Cc</code></td><td>Recipient and copy (manager, owner).</td><td><code>sam.patel@… / yousef.alhajri@…</code></td></tr>
+    <tr><td><code>ScheduledFor</code></td><td>When to send.</td><td><code>2026-11-20 06:00</code></td></tr>
+    <tr><td><code>Status / Error</code></td><td>Queued, Sent or Failed.</td><td><code>Queued</code></td></tr>
+  </tbody></table></div></details>
+  <p><b>How the pieces combine:</b> AccessRequest (who + RoleTemplate + scope + dates) → the template's ObjectRule, RowRule and ColumnRule per Item → one RoleBinding per template + scope + item (<code>PrcBuyerOU102</code> on LH_PRC_Gold, filter <code>org_id = '102'</code>) → Entra group <code>grp-ol-PrcBuyerOU102</code> → AuditLog. <code>sec.vw_UserAccessDetail</code> shows the whole chain for one person.</p>
 </section>
 
 
@@ -1871,6 +2040,22 @@ svg .lbl{font-size:10.5px;font-weight:600}
   </table></div>
   <div class="note">The register already lists <code>SM_Procurement</code>, <code>DA_Procurement</code>, <code>SM_Payables</code> and <code>DA_Payables</code> as items (not OneLake-secured). P10 makes the sync give agent and model access to exactly the groups that hold the source roles, and adds a daily check that flags import models, fixed-identity connections and delegated SQL endpoints. Ontology and Foundry IQ behaviour is in preview and changes quickly, so the C7 test decides the final rule.</div>
   <p><b>Extra test C7 (KDD, paid capacity):</b> build an ontology on LH_PRC_Gold and add it as a data agent source. Ask as datasteward. Pass if only OU 102 appears. If other OUs appear, keep ontologies restricted to people who may see all their bound data until it is fixed.</p>
+</section>
+
+<section id="vision" data-tab="extend">
+  <span class="eyebrow">11.3 · Product vision</span>
+  <h2>One register, every engine that reads OneLake</h2>
+  <p class="lede">This is an enterprise data security product, not a one-off configuration. The register and the sync stay the same; each new engine is one more target that must reach OneLake as the asking user.</p>
+  <div class="tablewrap"><table>
+    <thead><tr><th>Stage</th><th>Engines covered</th><th>How the register reaches them</th><th>Status</th></tr></thead>
+    <tbody>
+      <tr><td><b>Now</b> · OneLake security</td><td>SQL analytics endpoint, Spark, Direct Lake</td><td>OneLake roles and Entra groups, compiled daily</td><td><span class="pill p-ok">Live in lab</span></td></tr>
+      <tr><td><b>Next</b> · Fabric IQ</td><td>Fabric data agents, semantic models, ontologies</td><td>Agent and model access granted to the same groups; daily check for paths that copy data or use a fixed identity</td><td><span class="pill p-warn">P10, tests C1 to C7</span></td></tr>
+      <tr><td><b>Then</b> · Work IQ</td><td>Microsoft 365 Copilot and Teams</td><td>Data agents published to Copilot still run as the user, so the same roles apply</td><td><span class="pill p-warn">Test C4</span></td></tr>
+      <tr><td><b>Then</b> · Foundry IQ</td><td>Foundry agents and knowledge bases</td><td>Agents call the Fabric data agent with identity passthrough; governed tables are not copied into search indexes</td><td><span class="pill p-warn">Test C5</span></td></tr>
+      <tr><td><b>Across domains</b></td><td>Every new domain and data product</td><td>Rows in the register (3.4), shortcuts to secured sources (11.1)</td><td><span class="pill p-bad">P8, P9</span></td></tr>
+    </tbody>
+  </table></div>
 </section>
 
 <div class="pager" id="pager"></div>

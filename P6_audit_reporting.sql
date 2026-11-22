@@ -64,3 +64,33 @@ GO
 -- SELECT TOP 50 * FROM sec.vw_AuditTrail ORDER BY EventTime DESC;
 -- SELECT * FROM sec.vw_SyncHealth ORDER BY RunId DESC;
 -- SELECT * FROM sec.vw_AccessReview ORDER BY DomainName, DisplayName;
+
+/* One row per person x request x table: who, which role, which table, row filter, columns, dates, and the
+   Fabric role and Entra group the sync built. Works in the SQL database and in the SQL analytics endpoint. */
+CREATE OR ALTER VIEW sec.vw_UserAccessDetail AS
+SELECT u.DisplayName, u.UPN, u.Department, u.EmploymentStatus,
+       ('ACC-' + RIGHT('00000' + CAST(r.RequestId AS VARCHAR(10)), 5)) AS RequestNumber,
+       r.Status AS RequestStatus, r.StartDate, r.EndDate,
+       DATEDIFF(DAY, CAST(GETDATE() AS DATE), r.EndDate) AS DaysLeft,
+       r.ApproverUPN, r.ApprovedAt,
+       (SELECT MAX(a.EventTime) FROM sec.AuditLog a
+         WHERE a.RequestId = r.RequestId AND a.Action = 'REQUEST_ACTIVATED') AS ActivatedAt,
+       d.DomainName, t.RoleCode, t.MaxDays, r.ScopeValue, sv.Label AS ScopeLabel,
+       w.WorkspaceName, i.ItemName, o.TablePath,
+       CASE WHEN rr.FilterColumn IS NULL THEN 'All rows'
+            ELSE rr.FilterColumn + ' = ''' + r.ScopeValue + '''' END AS RowFilter,
+       COALESCE(cr.AllowedColumns, 'All columns') AS AllowedColumns,
+       rb.RoleName AS FabricRole, rb.EntraGroupName, rb.AppliedAt AS RoleAppliedAt
+FROM sec.AccessRequest r
+JOIN sec.UserProfile  u  ON u.UserId = r.UserId
+JOIN sec.RoleTemplate t  ON t.RoleTemplateId = r.RoleTemplateId
+JOIN sec.Domain       d  ON d.DomainId = t.DomainId
+JOIN sec.ScopeValue   sv ON sv.ScopeValue = r.ScopeValue
+JOIN sec.ObjectRule   o  ON o.RoleTemplateId = r.RoleTemplateId
+JOIN sec.Item         i  ON i.ItemKey = o.ItemKey
+JOIN sec.Workspace    w  ON w.WorkspaceKey = i.WorkspaceKey
+LEFT JOIN sec.RowRule    rr ON rr.RoleTemplateId = o.RoleTemplateId AND rr.ItemKey = o.ItemKey AND rr.TablePath = o.TablePath
+LEFT JOIN sec.ColumnRule cr ON cr.RoleTemplateId = o.RoleTemplateId AND cr.ItemKey = o.ItemKey AND cr.TablePath = o.TablePath
+LEFT JOIN sec.RoleBinding rb ON rb.RoleTemplateId = r.RoleTemplateId AND rb.ItemKey = o.ItemKey
+                            AND rb.ScopeValue = r.ScopeValue AND rb.Status = 'Applied';
+GO

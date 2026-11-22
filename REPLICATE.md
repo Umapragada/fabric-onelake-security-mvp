@@ -69,10 +69,13 @@ Then `python P0_2_fabric_deploy.py run` → Emma Clarke appears in `grp-ol-PrcBu
 1. SQLDB_SecMeta → top-right drop-down → **SQL analytics endpoint** → New SQL query (empty) → run `P6_endpoint_views.sql`
    (the endpoint mirrors tables, not views or computed columns). If GitHub shows an old copy, hard-refresh first.
 2. **New semantic model** → `SM_SEC_Admin`, Direct Lake on SQL → ↻ → tick vw_EffectiveAccess, vw_ExpiringSoon, vw_AuditTrail,
-   vw_SyncHealth, vw_NotificationStatus, vw_AccessReview. The ⚠ icons are expected (views use DirectQuery).
-3. **New report** → one Table visual per page: Effective access, Expiring this week, Audit trail, Sync health, Notifications.
+   vw_SyncHealth, vw_NotificationStatus, vw_AccessReview, vw_UserAccessDetail. The ⚠ icons are expected (views use DirectQuery).
+3. **New report** → one Table visual per page: Effective access, Expiring this week, Audit trail, Sync health, Notifications, User access detail
+   (vw_UserAccessDetail: add a slicer on DisplayName).
    Set numeric columns like DaysLeft to "Don't summarize". Save as `RPT_SEC_Admin` in WS-SEC-Control.
-4. Share RPT_SEC_Admin with the auditor as an item share (no workspace role).
+4. Already have the report? Run `P6_endpoint_views.sql` again in the endpoint, open SM_SEC_Admin → **Edit tables** →
+   tick vw_UserAccessDetail → Confirm, then add the page in RPT_SEC_Admin.
+5. Share RPT_SEC_Admin with the auditor as an item share (no workspace role).
 
 ## Restore after a Cloud Shell reset
 Nothing in Azure/Fabric is lost; only the local folder. Paste (all steps reuse what exists):

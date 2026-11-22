@@ -129,3 +129,10 @@ Creates **PL_SEC_Lifecycle** (Lifecycle → Sync → Notify) and a daily 06:00 K
 | `Login failed` / token error in NB_SEC_Common | SPN not Admin on WS-SEC-Control, or wrong SQL host | Re-run `foundation`; check `kdd_fabric_ids.json` |
 | Persona sees everything | Persona has a workspace role above Viewer, or SQL endpoint still in delegated mode | Remove the role; step 4.1 |
 | `DRIFT_DETECTED` on first live run | Sample `sec.RoleBinding` rows still present | The tail of `P3_metamodel.sql` clears them; re-run that block |
+
+## Documentation
+- `REPLICATE.md`: step-by-step checklist to deploy in a new tenant.
+- `docs/FMCG_OneLake_Security_Blueprint.html`: the design document (open in a browser).
+- `docs/SECURITY_METADATA_DICTIONARY.md`: every register table and column, with examples and who maintains it.
+  Regenerate with `python tools/render.py docs/SECURITY_METADATA_DICTIONARY.md /tmp/dict.html` after editing `tools/dictionary.py`.
+- `sec.vw_UserAccessDetail` (in `P6_audit_reporting.sql` and `P6_endpoint_views.sql`): person → request → role → table → row filter → columns → Fabric role.
