@@ -224,6 +224,9 @@ def pipeline():
     sched = {"enabled": True, "configuration": {"type": "Daily", "times": ["06:00"], "startDateTime": time.strftime("%Y-%m-%dT00:00:00Z"),
                                                 "endDateTime": "2027-12-31T23:59:00Z", "localTimeZoneId": "Arab Standard Time"}}
     for job_type in ("Pipeline", "DefaultJob"):
+        have = call("GET", f"/workspaces/{ws}/items/{pid}/jobs/{job_type}/schedules", ok=None)
+        if have.status_code == 200 and have.json().get("value"):
+            print(f"Schedule already exists (jobType {job_type}); not adding another"); return
         r = call("POST", f"/workspaces/{ws}/items/{pid}/jobs/{job_type}/schedules", ok=None, json=sched)
         if r.status_code in (200, 201):
             print(f"Daily 06:00 (Kuwait time) schedule created with jobType {job_type}"); return
@@ -231,7 +234,10 @@ def pipeline():
 
 def run():
     ws = IDS["workspaces"]["WS-SEC-Control"]
-    r = call("POST", f"/workspaces/{ws}/items/{IDS['pipeline']}/jobs/instances?jobType=Pipeline", ok=(202,))
+    pid = IDS.get("pipeline") or next((x["id"] for x in all_items(f"/workspaces/{ws}/dataPipelines") if x["displayName"] == "PL_SEC_Lifecycle"), None)
+    if not pid: sys.exit("PL_SEC_Lifecycle not found: run `python P0_2_fabric_deploy.py pipeline` first")
+    IDS["pipeline"] = pid; save_ids()
+    r = call("POST", f"/workspaces/{ws}/items/{pid}/jobs/instances?jobType=Pipeline", ok=(202,))
     print("Started PL_SEC_Lifecycle:", r.headers.get("Location"))
 
 if __name__ == "__main__":
