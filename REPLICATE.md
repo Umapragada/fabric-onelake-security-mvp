@@ -107,4 +107,4 @@ Don't re-run `P3_metamodel.sql` after the first time: it resets the register.
 | No "New semantic model" button | You are in SQL database mode; switch the drop-down to SQL analytics endpoint |
 | `Invalid column name 'RequestNumber'` in the endpoint | Use `P6_endpoint_views.sql` (rebuilds the computed column) |
 | `KeyError: 'notebooks'` running `pipeline` | Run `python P0_2_fabric_deploy.py notebooks` first |
-| Expired user still sees the workspace (no tables) | Fixed in NB_SEC_Sync step 6b (retired roles: group emptied, Viewer removed) |
+| Expired user still sees the workspace (no tables) | Fixed in NB_SEC_Sync step 6b (retired roles: group emptied) |
