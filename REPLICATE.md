@@ -77,6 +77,9 @@ Then `python P0_2_fabric_deploy.py run` → Emma Clarke appears in `grp-ol-PrcBu
    tick vw_UserAccessDetail → Confirm, then add the page in RPT_SEC_Admin.
 5. Share RPT_SEC_Admin with the auditor as an item share (no workspace role).
 
+## H. Scaling to hundreds of tables (P7, optional)
+Additive; never rerun P3. Steps and demo script: [docs/P7_SCALE_DEMO.md](docs/P7_SCALE_DEMO.md). Run `P7_scale.sql`, deploy notebooks, run NB_SEC_Catalog, then add pattern rules.
+
 ## Restore after a Cloud Shell reset
 Nothing in Azure/Fabric is lost; only the local folder. Paste (all steps reuse what exists):
 ```bash

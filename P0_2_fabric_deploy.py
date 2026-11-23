@@ -50,6 +50,8 @@ NOTEBOOKS = [  # (notebook name, workspace, source file, extra placeholders)
     ("NB_SEC_Sync", "WS-SEC-Control", "nb_sec_sync", {}),
     ("NB_SEC_Notify", "WS-SEC-Control", "nb_sec_notify", {}),
     ("NB_SEC_Run", "WS-SEC-Control", "nb_sec_run", {}),
+    ("NB_SEC_Catalog", "WS-SEC-Control", "nb_sec_catalog", {}),          # P7: catalogue harvest
+    ("NB_SEC_DemoNewTable", "WS-SEC-Control", "nb_sec_demo_new_table", {}),  # P7: demo only
 ]
 
 _tok = {}
