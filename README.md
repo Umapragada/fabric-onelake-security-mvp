@@ -132,7 +132,8 @@ Creates **PL_SEC_Lifecycle** (Lifecycle → Sync → Notify) and a daily 06:00 K
 
 ## Documentation
 - `REPLICATE.md`: step-by-step checklist to deploy in a new tenant.
-- `docs/FMCG_OneLake_Security_Blueprint.html`: the design document (open in a browser).
+- `docs/FMCG_OneLake_Security_Blueprint.html`: the design document, v1.3 (lab build; open in a browser).
+- `docs/FMCG_OneLake_Security_Blueprint_v1.4.html`: v1.4 for the stakeholder session; adds chapter 12 (KDD architecture, operating model, rollout plan, asks of owners, good-practice check, open questions).
 - `docs/SECURITY_METADATA_DICTIONARY.md`: every register table and column, with examples and who maintains it.
   Regenerate with `python tools/render.py docs/SECURITY_METADATA_DICTIONARY.md /tmp/dict.html` after editing `tools/dictionary.py`.
 - `sec.vw_UserAccessDetail` (in `P6_audit_reporting.sql` and `P6_endpoint_views.sql`): person → request → role → table → row filter → columns → Fabric role.
