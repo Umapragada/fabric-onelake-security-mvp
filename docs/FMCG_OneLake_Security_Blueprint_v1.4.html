@@ -253,7 +253,7 @@ svg .card-m{font-size:11px;fill:var(--muted)}
   <div class="grid g3">
     <div class="card"><h3 id="summary-purpose">Purpose</h3><p>Replace manual, workspace-wide grants with approved, time-limited access that limits each person to the operating units, tables and columns their job needs, across reporting and AI tools.</p></div>
     <div class="card"><h3 id="summary-scope">Scope</h3><ul class="plain"><li>Procurement and Payables domains, Bronze, Silver and Gold layers</li><li>Oracle EBS R12 as source (simulated in the lab)</li><li>RBAC, object, row and column security</li><li>Request, approval, expiry, revocation, audit and reporting</li></ul></div>
-    <div class="card"><h3 id="summary-out-of-scope">Out of scope</h3><ul class="plain"><li>Live Oracle EBS connectivity</li><li>Other business domains (Sales, Manufacturing)</li><li>Production rollout and hypercare; this document covers design and lab build</li></ul></div>
+    <div class="card"><h3 id="summary-out-of-scope">Out of scope</h3><ul class="plain"><li><b>AI agent security and the agent harness</b> (agent identity, tool and action permissions, prompt injection, content safety, agent logging and monitoring): a separate workstream. This design secures the data that agents read, which is the foundation that workstream builds on.</li><li>Live Oracle EBS connectivity</li><li>Other business domains (Sales, Manufacturing)</li><li>Production rollout and hypercare; this document covers design and lab build</li></ul></div>
   </div>
   <h3 id="summary-key-design-decisions">Key design decisions</h3>
   <div class="tablewrap"><table>
