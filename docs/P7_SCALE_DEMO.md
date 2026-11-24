@@ -1,4 +1,6 @@
-# P7 · Scaling to hundreds of tables: setup and demo
+# P7 · Scaling to hundreds of tables: setup and demo (optional, draft)
+
+> **Status: optional draft process.** Not part of the agreed scope. Details will be worked out later with the Data Owners.
 
 Four features, added on top of the working lab. Nothing in P3 is dropped or changed, and **P3 must not be rerun**.
 Without a row in `sec.ObjectPattern` the sync behaves exactly as before.
