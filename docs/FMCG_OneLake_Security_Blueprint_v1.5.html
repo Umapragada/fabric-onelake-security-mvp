@@ -2567,9 +2567,14 @@ svg .lbl{font-size:10.5px;font-weight:600}
     <text x="912" y="218" class="h">ws_security</text><text x="912" y="236" class="s">SQLDB_SecMeta register</text><text x="912" y="252" class="s">NB_SEC_Sync, PL_SEC_Lifecycle</text><text x="912" y="268" class="s">daily + on approval</text>
 
     <!-- governance band -->
-    <rect class="bx" x="20" y="400" width="1060" height="70" rx="8"/>
-    <text x="32" y="424" class="h">Governance and monitoring</text>
-    <text x="32" y="446" class="s">Purview audit and DLP · Fabric audit log · register AuditLog and RPT_SEC_Admin · Application Insights traces · Defender for Cloud AI threat protection · monthly access and answer review</text>
+    <rect class="bx reg" x="20" y="400" width="430" height="70" rx="8"/>
+    <text x="32" y="422" class="h">Microsoft Agent 365 · agent control plane</text>
+    <text x="32" y="442" class="s">Registry of every agent (Foundry, Copilot Studio, Fabric) with owner</text>
+    <text x="32" y="458" class="s">Entra Agent ID · access policies · observability · Defender and Purview</text>
+    <rect class="bx" x="460" y="400" width="620" height="70" rx="8"/>
+    <text x="472" y="422" class="h">Governance and monitoring</text>
+    <text x="472" y="442" class="s">Purview audit and DLP · Fabric audit log · register AuditLog and RPT_SEC_Admin</text>
+    <text x="472" y="458" class="s">Application Insights traces · Defender for Cloud AI threat protection · monthly review</text>
 
     <!-- red band -->
     <rect class="bx badz" x="20" y="490" width="1060" height="90" rx="8"/>
@@ -2600,7 +2605,7 @@ svg .lbl{font-size:10.5px;font-weight:600}
     <text x="20" y="610" class="m">CHECKPOINTS</text>
     <text x="20" y="632" class="s">1 Sign-in with MFA and Conditional Access · 2 Foundry User role decides who may use the agent · 3 Content safety, prompt shields and tool allow-list</text>
     <text x="20" y="652" class="s">4 OneLake roles filter tables, rows and columns for the signed-in user · 5 Roles come only from the approved register, with end dates</text>
-    <text x="20" y="672" class="s">6 Every question, tool call and data access is traced and audited · approval step before any level 3 action</text>
+    <text x="20" y="672" class="s">6 Every question, tool call and data access is traced and audited; every agent is registered in Agent 365 with an owner · approval step before any level 3 action</text>
   </svg></div>
 
   <h3 id="agents-architecture-flow">One question, end to end</h3>
@@ -2621,6 +2626,7 @@ svg .lbl{font-size:10.5px;font-weight:600}
       <tr><td>Aishwarya Naresh Reganti, video on harness engineering (building the "NS Work" company harness with LangGraph Deep Agents)</td><td>The four harness components (context, actions, boundaries, persistence), middleware limits, reviewer subagents, human approval checkpoints and checkpointed conversations. Mapped to KDD in 13.1.</td></tr>
       <tr><td>Aishwarya Naresh Reganti on GitHub: <a href="https://github.com/aishwaryanr/awesome-generative-ai-guide">awesome-generative-ai-guide</a>, <a href="https://github.com/aishwaryanr/agent-native-operator">agent-native-operator</a></td><td>Learning material for the team on agent design and evaluation.</td></tr>
       <tr><td>Microsoft, <a href="https://cdn-dynmedia-1.microsoft.com/is/content/microsoftcorp/microsoft/mcaps/documents/fy26/Sourcing.pdf">AI solution overviews: Sourcing</a> and <a href="https://cdn-dynmedia-1.microsoft.com/is/content/microsoftcorp/microsoft/mcaps/documents/fy26/Self-Sourcing-Agent.pdf">Self-Sourcing Agent</a></td><td>A real procurement agent portfolio on Azure AI Foundry: self-sourcing (scoping, request for bid, supplier recommendations), supplier Q&amp;A, intelligent quote and procurement analytics from one governed source. It maps to the Value Finder, RFX Support and Negotiation Wingman use cases.</td></tr>
+      <tr><td>Microsoft, <a href="https://learn.microsoft.com/microsoft-agent-365/overview">Microsoft Agent 365 overview</a></td><td>The control plane for all agents: one registry, agent identity in Entra, access control, observability, and Defender and Purview protection. Used as the governance layer in the architecture above (control AS10).</td></tr>
     </tbody>
   </table></div>
   
@@ -2629,7 +2635,7 @@ svg .lbl{font-size:10.5px;font-weight:600}
 
 <section id="agents-security" data-tab="agents">
   <span class="eyebrow">13.4 · Agent security controls</span>
-  <h2>Nine controls in the harness, each with an owner and a test</h2>
+  <h2>Ten controls around the agent, each with an owner and a test</h2>
   <p class="lede">Data security is already handled by OneLake. Agent security adds the controls around the model: who may use the agent, what it may call, what it may say, and what is recorded.</p>
   <div class="tablewrap"><table>
     <thead><tr><th>#</th><th>Control</th><th>How at KDD</th><th>Owner</th><th>Test</th></tr></thead>
@@ -2643,6 +2649,7 @@ svg .lbl{font-size:10.5px;font-weight:600}
       <tr><td>AS7</td><td>Groundedness</td><td>See 13.6: answer only from tool results, show the source, say "no access" instead of guessing; evaluation set per persona</td><td>Product Owner</td><td>C9</td></tr>
       <tr><td>AS8</td><td>Logging and audit</td><td>Foundry tracing to Application Insights (who asked, which tool, which item); Fabric and Purview audit for data access; monthly review</td><td>Internal Audit</td><td>Review</td></tr>
       <tr><td>AS9</td><td>Data residency</td><td>AI processing location decided by MIS and Legal; cross-geo tenant settings only if approved. Microsoft notes that agent responses can leave the Fabric compliance boundary</td><td>Data Owner, MIS</td><td>Decision</td></tr>
+      <tr><td>AS10</td><td>Agent inventory and agent identity</td><td>Every agent (Foundry, Copilot Studio, Fabric data agents) registered in <b>Microsoft Agent 365</b> with an owner and an Entra Agent ID; unregistered agents blocked; Defender and Purview policies applied to agents. Generally available since May 2026; confirm the licence with MIS</td><td>Security Admin</td><td>Review</td></tr>
     </tbody>
   </table></div>
   <h3 id="agents-security-paths">One sign-in, three read paths</h3>
